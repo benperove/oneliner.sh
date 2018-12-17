@@ -1,0 +1,7 @@
+*.pyc
+log/
+ve/
+share/vim/.vim/
+share/vim/.viminfo
+typescript
+venv/
