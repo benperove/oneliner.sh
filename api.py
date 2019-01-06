@@ -13,7 +13,20 @@ def prepare_response(req, resp):
 @api.route("/{cat}/{name}")
 async def greet_world(req, resp, *, cat, name):
     resp.text = f"{cat}/{name}!"
-    redis.set('mykey', resp.text)
+    cache_write('mykey', resp.text)
+
+@api.route("/{cat}/{name}/json")
+async def test2(req, resp, *, cat, name):
+    resp.media = {"category": cat, "name": name}
+
+def cache_read(key):
+    return redis.get(key)
+
+def cache_write(key, val):
+    redis.set(key, val)
+
+def cache_clear():
+    redis.flushdb()
 
 if __name__ == '__main__':
     api.run()
