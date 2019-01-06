@@ -30,9 +30,14 @@ def logo(ip = None):
 """
     return logo
 
+#requests for a category
+@api.route("/{cat}")
+async def cat(req, resp, *, cat):
+    resp.text = logo(ip) + get_answer(cat)
+
 #requests for a category and name
 @api.route("/{cat}/{name}")
-async def greet_world(req, resp, *, cat, name):
+async def cat_name(req, resp, *, cat, name):
     resp.text = logo(ip) + get_answer(cat, name)
 
 #requests for category and name with a json response
@@ -41,7 +46,7 @@ async def test2(req, resp, *, cat, name):
     resp.media = {"category": cat, "name": name}
 
 #get request answer
-def get_answer(cat, name):
+def get_answer(cat, name = None):
     dirs = [d for d in listdir('data') if isdir(join('data', d))]
     if cat in dirs:
         r1 = "cat " + cat + " is in list\n"
@@ -56,36 +61,58 @@ def get_answer(cat, name):
                 contents = fc.read()
                 #write to cache
                 cache_write(cat + '/' + name, contents)
-                return contents
+                return strip_metadata(contents) + "\n"
             else:
                 #cache hit
-                return f3.decode('utf-8')
+                print('cache hit')
+                return strip_metadata(f3) + "\n"
         else:
-            f2 = "name " + name + " is NOT in cat " + cat
-            return suggest_names(cat, name, f1)
-    return "cat " + cat + " not found"
-
-#offer category suggestions
-def suggest_cat(cat):
-    return cat
-
-#offer name suggestions for category
-def suggest_names(cat, name, suggestions):
-    names = ', '.join(suggestions)
-    return name + " not found in " + cat + "\n" + 'suggestions: ' + names
+            #name not found in category
+            #instead of returning name suggestions, return everything
+            #return suggest_names(cat, name, f1)
+            ar = ''
+            for n in f1:
+                if cache_read(cat + '/' + n) is not None:
+                    ar += strip_metadata(cache_read(cat + '/' + n)) + "\n"
+                else:
+                    fc = open('data/' + cat + '/' + n, 'r')
+                    contents = fc.read()
+                    cache_write(cat + '/' + n, contents)
+                    ar += strip_metadata(contents) + "\n"
+            return ar
+    #category not found
+    return suggest_cat(cat, dirs)
 
 #process votes for category and name
 @api.route("/{cat}/{name}/vote")
 async def vote(req, resp, *, cat, name):
     resp.media = {"category": cat, "name": name, "votes": 1}
 
+#offer category suggestions
+def suggest_cat(cat, dirs):
+    cats = ', '.join(dirs)
+    return cat + " not found\n" + 'suggestions: ' + cats
+
+#offer name suggestions for category
+def suggest_names(cat, name, suggestions):
+    names = ', '.join(suggestions)
+    return name + " not found in " + cat + "\n" + 'suggestions: ' + names
+
+#strip result metedata
+def strip_metadata(result):
+    return result.split("\n", 2)[2]
+
 #update result metadata
 
-#colorize
+#colorize results
 
 #cache - get value
 def cache_read(key):
-    return redis.get(key)
+    r = redis.get(key)
+    if r is not None:
+        return r.decode('utf-8')
+    else:
+        return None
 
 #cache - set value
 def cache_write(key, val):
