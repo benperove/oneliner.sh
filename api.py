@@ -162,7 +162,7 @@ def col(text, color=None):
 
 #beautify results
 def beautify(text):
-    m = re.findall(r"^#", text)
+    m = re.findall(r'^#', text)
     print(m)
 #    if m:
 #        return col(text, 'f_blue')
@@ -193,7 +193,7 @@ def time_elapsed(start_time):
 
 #print logo
 def logo(ip=None, start_time=None):
-    info = col(ip, 'f_blue') + ' in ' + col(str(time_elapsed(start_time)), 'f_light_blue') + ' seconds'
+    info = col(ip, 'f_blue') + col(' in ', 'f_white') + col(str(time_elapsed(start_time)), 'f_light_blue') + col(' seconds', 'f_white')
     logo = """
                    _                       _      
                   | ( )                   | |     
