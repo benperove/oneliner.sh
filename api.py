@@ -2,7 +2,7 @@
 #oneliner.sh
 #benperove@gmail.com
 
-import responder, redis, os, re, config
+import responder, redis, os, re, time, config
 from os import listdir
 from os.path import isdir, isfile, join
 
@@ -23,12 +23,12 @@ def prepare_headers(req, resp):
 #requests for a category
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
-    resp.text = logo(ip) + get_answer(cat)
+    resp.text = logo(ip, time.time()) + get_answer(cat)
 
 #requests for a category + name
 @api.route("/{cat}/{name}")
 async def cat_name(req, resp, *, cat, name):
-    resp.text = logo(ip) + get_answer(cat, name)
+    resp.text = logo(ip, time.time()) + get_answer(cat, name)
 
 #requests for category + name with a json response
 @api.route("/{cat}/{name}/json")
@@ -48,7 +48,6 @@ def record_vote(cat, name):
         label, votes = data[0].split(': ')
         v            = int(votes) + 1
         data[0]      = label + ': ' + str(v) + "\n"
-        #fin.writelines(data)
     with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
         fin2.writelines(data)
     c2 = read_file(cat, name)
@@ -69,20 +68,20 @@ def get_answer(cat, name=None):
             if f3 == None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
-                return strip_metadata(read_file(cat, name)) + "\n"
+                return read_file(cat, name) + "\n"
             else:
                 #cache hit
                 print('DEBUG: cache hit') if config.DEBUG else 0
-                return strip_metadata(f3) + "\n"
+                return f3 + "\n"
         else:
             #name not found in category
             #instead of returning name suggestions, return everything
             ar = ''
             for n in f1:
                 if cache_read(cat + '/' + n) is not None:
-                    ar += strip_metadata(cache_read(cat + '/' + n)) + "\n"
+                    ar += cache_read(cat + '/' + n) + "\n"
                 else:
-                    ar += strip_metadata(read_file(cat, n)) + "\n"
+                    ar += read_file(cat, n) + "\n"
             return ar
     #category not found
     return suggest_cat(cat, dirs)
@@ -113,11 +112,9 @@ def suggest_names(cat, name, suggestions):
     return name + " not found in " + cat + "\n" + 'suggestions: ' + names
 
 #strip result metedata
-def strip_metadata(result):
+#def strip_metadata(result):
 #    return result.split("\n", 2)[2]
-     return result
-
-#update result metadata
+#     return result
 
 #colorize text
 def col(text, color=None):
@@ -195,8 +192,13 @@ def cache_delete(key):
 def cache_clear():
     redis.flushdb()
 
-#oneliner.sh logo
-def logo(ip=None):
+#calculate request time
+def time_elapsed(start_time):
+    return "%02.8f" % (time.time() - start_time)
+
+#print logo
+def logo(ip=None, start_time=None):
+    info = col(ip, 'f_blue') + ' in ' + col(str(time_elapsed(start_time)), 'f_light_blue') + ' seconds'
     logo = """
                    _                       _      
                   | ( )                   | |     
@@ -204,7 +206,7 @@ def logo(ip=None):
   / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \  
  | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | | 
   \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_| 
-   """ + col(ip, 'f_blue') + """
+   """ + info + """
 
 """
     return logo
