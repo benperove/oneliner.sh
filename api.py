@@ -68,11 +68,11 @@ def get_answer(cat, name = None):
             #if nothing found in cache
             if f3 == None:
                 #get file + write cache + return contents
-                print('cache miss')
+                print('DEBUG: cache miss')
                 return strip_metadata(read_file(cat, name)) + "\n"
             else:
                 #cache hit
-                print('cache hit')
+                print('DEBUG: cache hit')
                 return strip_metadata(f3) + "\n"
         else:
             #name not found in category
