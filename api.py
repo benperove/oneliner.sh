@@ -20,20 +20,6 @@ def prepare_headers(req, resp):
     ip, port = req.headers['host'].split(':')
     resp.headers['x-pizza'] = 'delicious'
 
-#oneliner.sh logo
-def logo(ip = None):
-    logo = """
-                   _                       _     
-                  |  @benperove           | |    
-   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
-  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
- | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
-  \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
-   """ + ip + """
-
-"""
-    return logo
-
 #requests for a category
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
@@ -68,11 +54,11 @@ def get_answer(cat, name = None):
             #if nothing found in cache
             if f3 == None:
                 #get file + write cache + return contents
-                print('DEBUG: cache miss')
+                print('DEBUG: cache miss') if config.DEBUG else 0
                 return strip_metadata(read_file(cat, name)) + "\n"
             else:
                 #cache hit
-                print('DEBUG: cache hit')
+                print('DEBUG: cache hit') if config.DEBUG else 0
                 return strip_metadata(f3) + "\n"
         else:
             #name not found in category
@@ -128,6 +114,20 @@ def cache_write(key, val):
 #cache - flush the entire cache db
 def cache_clear():
     redis.flushdb()
+
+#oneliner.sh logo
+def logo(ip = None):
+    logo = """
+                   _                       _     
+                  |  @benperove           | |    
+   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
+  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
+ | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
+  \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
+   """ + ip + """
+
+"""
+    return logo
 
 #ain't nothin' to it but to do it
 if __name__ == '__main__':
