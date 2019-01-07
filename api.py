@@ -52,10 +52,6 @@ def record_vote(cat, name):
     with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
         fin2.writelines(data)
     c2 = read_file(cat, name)
-    #cache delete
-    cache_delete(cat + '/' + name)
-    #write to cache
-    cache_write(cat + '/' + name, c2)
     return v
 
 #get request answer
