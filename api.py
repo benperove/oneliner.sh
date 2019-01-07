@@ -51,7 +51,7 @@ def get_answer(cat, name = None):
         if name in f1:
             f2 = "name " + name + " is in cat " + cat
             f3 = cache_read(cat + '/' + name)
-            #if nothing found in cache
+            #if cache miss
             if f3 == None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
@@ -118,10 +118,10 @@ def cache_clear():
 #oneliner.sh logo
 def logo(ip = None):
     logo = """
-                   _                       _     
-                  |  @benperove           | |    
-   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
-  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
+                   _                       _
+                  | (@benperove           | |
+   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__
+  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \
  | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
   \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
    """ + ip + """
