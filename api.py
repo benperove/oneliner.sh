@@ -2,14 +2,18 @@
 #oneliner.sh
 #benperove@gmail.com
 
-import responder, redis, os
+import responder, redis, os, config
 from os import listdir
 from os.path import isdir, isfile, join
 
 api   = responder.API()
-redis = redis.StrictRedis(host='localhost', port=6379, db=0)
+redis = redis.StrictRedis(
+            host=config.REDIS_HOST,
+            port=config.REDIS_PORT,
+            db=config.REDIS_DB)
 
-#specify these headers for all requests
+#set client ip address and
+#specify headers for all requests
 @api.route(before_request=True)
 def prepare_headers(req, resp):
     global ip
@@ -35,33 +39,37 @@ def logo(ip = None):
 async def cat(req, resp, *, cat):
     resp.text = logo(ip) + get_answer(cat)
 
-#requests for a category and name
+#requests for a category + name
 @api.route("/{cat}/{name}")
 async def cat_name(req, resp, *, cat, name):
     resp.text = logo(ip) + get_answer(cat, name)
 
-#requests for category and name with a json response
+#requests for category + name with a json response
 @api.route("/{cat}/{name}/json")
 async def test2(req, resp, *, cat, name):
     resp.media = {"category": cat, "name": name}
 
+#process votes for category + name
+@api.route("/{cat}/{name}/vote")
+async def vote(req, resp, *, cat, name):
+    resp.media = {"category": cat, "name": name, "votes": 1}
+
 #get request answer
 def get_answer(cat, name = None):
-    dirs = [d for d in listdir('data') if isdir(join('data', d))]
+    #get a list of all dirs/categories from data dir
+    dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
+    #if category exists
     if cat in dirs:
         r1 = "cat " + cat + " is in list\n"
-        f1 = [f for f in listdir('data/' + cat) if isfile(join('data/' + cat, f))]
+        f1 = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
         if name in f1:
             f2 = "name " + name + " is in cat " + cat
             f3 = cache_read(cat + '/' + name)
-            #if nothing is found in cache
+            #if nothing found in cache
             if f3 == None:
-                #read the file
-                fc = open('data/' + cat + '/' + name, 'r')
-                contents = fc.read()
-                #write to cache
-                cache_write(cat + '/' + name, contents)
-                return strip_metadata(contents) + "\n"
+                #get file + write cache + return contents
+                print('cache miss')
+                return strip_metadata(read_file(cat, name)) + "\n"
             else:
                 #cache hit
                 print('cache hit')
@@ -69,24 +77,23 @@ def get_answer(cat, name = None):
         else:
             #name not found in category
             #instead of returning name suggestions, return everything
-            #return suggest_names(cat, name, f1)
             ar = ''
             for n in f1:
                 if cache_read(cat + '/' + n) is not None:
                     ar += strip_metadata(cache_read(cat + '/' + n)) + "\n"
                 else:
-                    fc = open('data/' + cat + '/' + n, 'r')
-                    contents = fc.read()
-                    cache_write(cat + '/' + n, contents)
-                    ar += strip_metadata(contents) + "\n"
+                    ar += strip_metadata(read_file(cat, n)) + "\n"
             return ar
     #category not found
     return suggest_cat(cat, dirs)
 
-#process votes for category and name
-@api.route("/{cat}/{name}/vote")
-async def vote(req, resp, *, cat, name):
-    resp.media = {"category": cat, "name": name, "votes": 1}
+#read file + write cache
+def read_file(cat, name):
+    fp       = open(config.DATA_DIR + '/' + cat + '/' + name, 'r')
+    contents = fp.read()
+    #write to cache
+    cache_write(cat + '/' + name, contents)
+    return contents
 
 #offer category suggestions
 def suggest_cat(cat, dirs):
@@ -108,9 +115,9 @@ def strip_metadata(result):
 
 #cache - get value
 def cache_read(key):
-    r = redis.get(key)
-    if r is not None:
-        return r.decode('utf-8')
+    v = redis.get(key)
+    if v is not None:
+        return v.decode('utf-8')
     else:
         return None
 
