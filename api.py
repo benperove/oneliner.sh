@@ -111,11 +111,6 @@ def suggest_names(cat, name, suggestions):
     names = ', '.join(suggestions)
     return name + " not found in " + cat + "\n" + 'suggestions: ' + names
 
-#strip result metedata
-#def strip_metadata(result):
-#    return result.split("\n", 2)[2]
-#     return result
-
 #colorize text
 def col(text, color=None):
     c = {
