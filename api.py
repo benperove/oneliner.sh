@@ -2,7 +2,7 @@
 #oneliner.sh
 #benperove@gmail.com
 
-import responder, redis, os, config
+import responder, redis, os, re, config
 from os import listdir
 from os.path import isdir, isfile, join
 
@@ -38,10 +38,28 @@ async def test2(req, resp, *, cat, name):
 #process votes for category + name
 @api.route("/{cat}/{name}/vote")
 async def vote(req, resp, *, cat, name):
-    resp.media = {"category": cat, "name": name, "votes": 1}
+    votes = record_vote(cat, name)
+    resp.media = {"category": cat, "name": name, "votes": votes}
+
+#record vote
+def record_vote(cat, name):
+    with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
+        data         = fin.readlines()
+        label, votes = data[0].split(': ')
+        v            = int(votes) + 1
+        data[0]      = label + ': ' + str(v) + "\n"
+        #fin.writelines(data)
+    with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
+        fin2.writelines(data)
+    c2 = read_file(cat, name)
+    #cache delete
+    cache_delete(cat + '/' + name)
+    #write to cache
+    cache_write(cat + '/' + name, c2)
+    return v
 
 #get request answer
-def get_answer(cat, name = None):
+def get_answer(cat, name=None):
     #get a list of all dirs/categories from data dir
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
@@ -77,9 +95,16 @@ def get_answer(cat, name = None):
 def read_file(cat, name):
     fp       = open(config.DATA_DIR + '/' + cat + '/' + name, 'r')
     contents = fp.read()
+    c2       = ''
+    with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
+        for line in fin:
+            if re.match(r'^#', line):
+                c2 += col(line, 'f_light_cyan')
+            else:
+                c2 += col(line, 'f_white')
     #write to cache
-    cache_write(cat + '/' + name, contents)
-    return contents
+    cache_write(cat + '/' + name, c2)
+    return c2
 
 #offer category suggestions
 def suggest_cat(cat, dirs):
@@ -93,11 +118,12 @@ def suggest_names(cat, name, suggestions):
 
 #strip result metedata
 def strip_metadata(result):
-    return result.split("\n", 2)[2]
+#    return result.split("\n", 2)[2]
+     return result
 
 #update result metadata
 
-#colorize results
+#colorize text
 def col(text, color=None):
     c = {
         #background
@@ -146,6 +172,14 @@ def col(text, color=None):
     }
     return "\033[" + c[color] + 'm' + text + "\033[0m"
 
+#beautify results
+def beautify(text):
+    m = re.findall(r"^#", text)
+    print(m)
+#    if m:
+#        return col(text, 'f_blue')
+#    return text
+
 #cache - get value
 def cache_read(key):
     v = redis.get(key)
@@ -158,6 +192,9 @@ def cache_read(key):
 def cache_write(key, val):
     redis.set(key, val)
 
+def cache_delete(key):
+    redis.delete(key)
+
 #cache - flush the entire cache db
 def cache_clear():
     redis.flushdb()
@@ -166,12 +203,12 @@ def cache_clear():
 def logo(ip=None):
     logo = """
                    _                       _      
-                  | (""" + col('@benperove', 'f_light_blue') + """           | |     
+                  | ( )                   | |     
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__   
   / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \  
  | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | | 
   \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_| 
-   """ + col(ip, 'f_light_green') + """
+   """ + col(ip, 'f_blue') + """
 
 """
     return logo
