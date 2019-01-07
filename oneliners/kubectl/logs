@@ -1,4 +1,6 @@
-votes: 0
-
-#get logs
-ns=default kubectl get pods --selector='app=api-codegroups-dev' -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | xargs -I {} kubectl -n $ns logs {} -c api-codegroups-dev --tail=50
+# votes: 0
+# purpose: gets container logs
+# usage: set first three variables as:
+# ns=<namespace>, app=<app name>, container=<container name>
+# ----------------------------------------------------------
+ns=default; app=api-codegroups-dev; container=api-codegroups-dev; kubectl get pods --selector="app=$app" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | xargs -I {} kubectl -n $ns logs {} -c $container --tail=50

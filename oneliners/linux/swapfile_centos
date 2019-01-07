@@ -1,0 +1,12 @@
+# votes: 6
+# purpose: create a swapfile in centos
+# usage: set variables as
+# size=<swap size in megabytes> 
+# ------------------------------------
+size=2048; sudo dd if=/dev/zero of=/srv/swap bs=1024k count=$size && \
+sudo chmod 0600 /srv/swap && \
+sudo mkswap /srv/swap && \
+sudo swapon /srv/swap && \
+echo '/srv/swap none swap sw 0 0' | sudo tee -a /etc/fstab && \
+echo 'vm.swappiness = 20' | sudo tee -a /etc/sysctl.conf && \
+sudo sysctl -p
