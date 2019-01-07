@@ -1,0 +1,4 @@
+votes: 0
+
+#get logs
+ns=default kubectl get pods --selector='app=api-codegroups-dev' -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | xargs -I {} kubectl -n $ns logs {} -c api-codegroups-dev --tail=50
