@@ -2,7 +2,7 @@
 #oneliner.sh
 #benperove@gmail.com
 
-import responder, redis, os, re, time, config
+import responder, redis, time, config, os, re
 from os import listdir
 from os.path import isdir, isfile, join
 
@@ -93,10 +93,7 @@ def read_file(cat, name):
     c2       = ''
     with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
         for line in fin:
-            if re.match(r'^#', line):
-                c2 += col(line, 'f_light_cyan')
-            else:
-                c2 += col(line, 'f_white')
+            c2 += colorize(line)
     #write to cache
     cache_write(cat + '/' + name, c2)
     return c2
@@ -111,7 +108,7 @@ def suggest_names(cat, name, suggestions):
     names = ', '.join(suggestions)
     return name + " not found in " + cat + "\n" + 'suggestions: ' + names
 
-#colorize text
+#color formatting
 def col(text, color=None):
     c = {
         #background
@@ -123,6 +120,7 @@ def col(text, color=None):
         'b_magenta'     : '45',
         'b_red'         : '41',
         'b_yellow'      : '43',
+        'b_dark_gray'   : '100',
         #foreground
         'f_black'       : '30',
         'f_blue'        : '34',
@@ -160,13 +158,13 @@ def col(text, color=None):
     }
     return "\033[" + c[color] + 'm' + text + "\033[0m"
 
-#beautify results
-def beautify(text):
-    m = re.findall(r'^#', text)
-    print(m)
-#    if m:
-#        return col(text, 'f_blue')
-#    return text
+#colorize results
+def colorize(text):
+    if re.match(r'^#', text):
+        t = col(text, 'f_dark_gray')
+    else:
+        t = col(text, 'f_white')
+    return t
 
 #cache - get value
 def cache_read(key):
@@ -194,8 +192,7 @@ def time_elapsed(start_time):
 #print logo
 def logo(ip=None, start_time=None):
     info = col(ip, 'f_blue') + col(' in ', 'f_white') + col(str(time_elapsed(start_time)), 'f_light_blue') + col(' seconds', 'f_white')
-    logo = """
-                   _                       _      
+    logo = """                   _                       _      
                   | ( )                   | |     
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__   
   / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \  
