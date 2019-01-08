@@ -1,6 +1,6 @@
 # votes: 1
 # purpose: create a swapfile in ubuntu
-# usage: set variables as
+# usage: set variable as
 # size=<swap size in megabytes> 
 # ------------------------------------
 size=2048; sudo dd if=/dev/zero of=/srv/swap bs=1024k count=$size && \

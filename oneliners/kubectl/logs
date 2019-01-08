@@ -1,4 +1,6 @@
-# votes: 0
+#   ▲
+#  256  /kubectl/logs/vote
+#   ▼
 # purpose: gets container logs
 # usage: set first three variables as:
 # ns=<namespace>, app=<app name>, container=<container name>
