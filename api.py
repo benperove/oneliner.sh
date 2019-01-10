@@ -17,7 +17,7 @@ redis = redis.StrictRedis(
 @api.route(before_request=True)
 def prepare_headers(req, resp):
     global ip
-    ip, port = req.headers['host'].split(':')
+    ip = req._starlette.client.host
     resp.headers['x-pizza'] = 'delicious'
 
 #requests for a category
@@ -28,6 +28,7 @@ async def cat(req, resp, *, cat):
 #requests for a category + name
 @api.route("/{cat}/{name}")
 async def cat_name(req, resp, *, cat, name):
+    print('debug catname')
     resp.text = logo(ip, time.time()) + get_answer(cat, name)
 
 #requests for category + name with a json response
