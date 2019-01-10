@@ -1,6 +1,4 @@
-#   ▲   
-#  108  /linux/swapfile_centos/vote
-#   ▼   
+# ▲108 /linux/swapfile+centos/upvote
 # purpose: create a swapfile in centos
 # usage: set variable as
 # size=<swap size in megabytes>
