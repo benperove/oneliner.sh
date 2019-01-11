@@ -20,6 +20,11 @@ def prepare_headers(req, resp):
     ip = req._starlette.client.host
     resp.headers['x-pizza'] = 'delicious'
 
+#requests for the main page
+@api.route("/")
+async def main(req, resp):
+    resp.text = logo(ip, time.time()) + 'coming soon'
+
 #requests for a category
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
@@ -28,7 +33,6 @@ async def cat(req, resp, *, cat):
 #requests for a category + name
 @api.route("/{cat}/{name}")
 async def cat_name(req, resp, *, cat, name):
-    print('debug catname')
     resp.text = logo(ip, time.time()) + get_answer(cat, name)
 
 #requests for category + name with a json response
@@ -37,22 +41,30 @@ async def test2(req, resp, *, cat, name):
     resp.media = {"category": cat, "name": name}
 
 #process votes for category + name
-@api.route("/{cat}/{name}/vote")
+@api.route("/{cat}/{name}/upvote")
 async def vote(req, resp, *, cat, name):
-    votes = record_vote(cat, name)
-    resp.media = {"category": cat, "name": name, "votes": votes}
+    upvotes = record_upvote(cat, name)
+    if type(upvotes) == int:
+        resp.text = logo(ip, time.time()) + get_answer(cat, name) + 'upvoted!'
+    else:
+        resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
 
 #record vote
-def record_vote(cat, name):
+def record_upvote(cat, name):
     with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
-        data         = fin.readlines()
-        label, votes = data[0].split(': ')
-        v            = int(votes) + 1
-        data[0]      = label + ': ' + str(v) + "\n"
-    with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
-        fin2.writelines(data)
-    c2 = read_file(cat, name)
-    return v
+        data      = fin.readlines()
+        votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
+        v         = int(votes) + 1
+        data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + name + '/upvote\n'
+        has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + name)
+        if has_voted is None:
+            cache_write_exp('upvotes:' + ip + ':/' + cat + '/' + name, time.time(), ex=86400)
+            with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
+                fin2.writelines(data)
+                cache_delete(cat + '/' + name)
+            return v
+        else:
+            return 'already upvoted'
 
 #get request answer
 def get_answer(cat, name=None):
@@ -60,29 +72,29 @@ def get_answer(cat, name=None):
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
     if cat in dirs:
-        r1 = "cat " + cat + " is in list\n"
+        r1 = 'cat ' + cat + ' is in list\n'
         f1 = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
         if name in f1:
-            f2 = "name " + name + " is in cat " + cat
+            f2 = 'name ' + name + ' is in cat ' + cat
             f3 = cache_read(cat + '/' + name)
             #if cache miss
             if f3 == None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
-                return read_file(cat, name) + "\n"
+                return read_file(cat, name) + '\n'
             else:
                 #cache hit
                 print('DEBUG: cache hit') if config.DEBUG else 0
-                return f3 + "\n"
+                return f3 + '\n'
         else:
             #name not found in category
             #instead of returning name suggestions, return everything
             ar = ''
             for n in f1:
                 if cache_read(cat + '/' + n) is not None:
-                    ar += cache_read(cat + '/' + n) + "\n"
+                    ar += cache_read(cat + '/' + n) + '\n'
                 else:
-                    ar += read_file(cat, n) + "\n"
+                    ar += read_file(cat, n) + '\n'
             return ar
     #category not found
     return suggest_cat(cat, dirs)
@@ -102,12 +114,12 @@ def read_file(cat, name):
 #offer category suggestions
 def suggest_cat(cat, dirs):
     cats = ', '.join(dirs)
-    return cat + " not found\n" + 'suggestions: ' + cats
+    return cat + ' not found\n' + 'suggestions: ' + cats
 
 #offer name suggestions for category
 def suggest_names(cat, name, suggestions):
     names = ', '.join(suggestions)
-    return name + " not found in " + cat + "\n" + 'suggestions: ' + names
+    return name + ' not found in ' + cat + '\n' + 'suggestions: ' + names
 
 #color formatting
 def col(text, color=None):
@@ -157,7 +169,7 @@ def col(text, color=None):
         'rst'           : 'reset',
         'u'             : 'underline'
     }
-    return "\033[" + c[color] + 'm' + text + "\033[0m"
+    return '\033[' + c[color] + 'm' + text + '\033[0m'
 
 #colorize results
 def colorize(text):
@@ -178,6 +190,9 @@ def cache_read(key):
 #cache - set value
 def cache_write(key, val):
     redis.set(key, val)
+
+def cache_write_exp(key, val, ex):
+    redis.set(key, val, ex)
 
 def cache_delete(key):
     redis.delete(key)
