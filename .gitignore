@@ -6,3 +6,4 @@ share/vim/.viminfo
 typescript
 venv/
 secrets.py
+sites.txt

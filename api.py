@@ -57,10 +57,10 @@ async def github_login(req, resp):
     global client
     global access_token
     client = Client(secrets.KEY, secrets.SECRET,
-                site='https://api.github.com',
-                authorize_url='https://github.com/login/oauth/authorize',
-                token_url='https://github.com/login/oauth/access_token')
-    authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope='user,public_repo')
+                site=config.SITE,
+                authorize_url=config.AUTHORIZE_URL,
+                token_url=config.TOKEN_URL)
+    authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope=config.SCOPE)
     r = 'Go to the following link in your browser:\n\n'
     r +=  authorize_url + '\n\n'
     resp.text = logo(ip, time.time()) + r

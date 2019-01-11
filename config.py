@@ -1,6 +1,11 @@
 import os
-
-CALLBACK   = 'http://oneliner.sh/oauth2'
+#github login
+SITE          = 'https://api.github.com'
+CALLBACK      = 'http://oneliner.sh/oauth2'
+AUTHORIZE_URL = 'https://github.com/login/oauth/authorize'
+TOKEN_URL     = 'https://github.com/login/oauth/access_token'
+SCOPE         = 'user,public_repo'
+#redis config                
 REDIS_HOST = os.environ['REDIS_HOST']
 REDIS_HOST = 'localhost'
 REDIS_PORT = 6379
