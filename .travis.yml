@@ -1,4 +1,4 @@
-dist: trusty
+dist: xenial
 sudo: required
 
 language:
@@ -7,18 +7,30 @@ language:
 services:
   - docker
 
-env:
-  DOCKER_COMPOSE_VERSION: 1.23.2
+#env:
+#  DOCKER_COMPOSE_VERSION: 1.23.2
 
-addons:
-  apt:
-    packages:
-      - docker-ce
+#addons:
+#  apt:
+#    packages:
+#      - docker-ce
 
 before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-  - docker-compose up -d
-  - docker ps
+  - apt-get update && apt-get install -y python3.7-pip python3.7-dev
+  - pip3 install pipenv
+  - pipenv install
+  - docker build -t alphageek/oneliner.sh .
+  - docker tag oneliner.sh:latest alphageek/oneliner.sh
+
+deploy:
+  provider: script
+  script: bash deploy/docker_push
+  on:
+    branch: master
+
+#  - sudo rm /usr/local/bin/docker-compose
+#  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+#  - chmod +x docker-compose
+#  - sudo mv docker-compose /usr/local/bin
+#  - docker-compose up -d
+#  - docker ps
