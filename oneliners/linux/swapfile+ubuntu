@@ -1,4 +1,4 @@
-# ▲1 /linux/swapfile+ubuntu/upvote
+# ▲0 oneliner.sh/linux/swapfile+ubuntu/upvote
 # purpose: create a swapfile in ubuntu
 # usage: set variable as
 # size=<swap size in megabytes> 

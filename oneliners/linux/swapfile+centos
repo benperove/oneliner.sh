@@ -1,4 +1,4 @@
-# ▲108 /linux/swapfile+centos/upvote
+# ▲0 oneliner.sh/linux/swapfile+centos/upvote
 # purpose: create a swapfile in centos
 # usage: set variable as
 # size=<swap size in megabytes>
@@ -10,5 +10,3 @@ sudo swapon /srv/swap && \
 echo '/srv/swap none swap sw 0 0' | sudo tee -a /etc/fstab && \
 echo 'vm.swappiness = 20' | sudo tee -a /etc/sysctl.conf && \
 sudo sysctl -p
-
-
