@@ -252,10 +252,10 @@ def time_elapsed(start_time):
 #print logo
 def logo(ip=None, start_time=None):
     info = col(ip, 'f_blue') + col(' in ', 'f_white') + col(str(time_elapsed(start_time)), 'f_light_blue') + col(' seconds', 'f_white')
-    logo = """                   _                       _
-                  | ( )                   | |
-   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__
-  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \
+    logo = """                   _                       _     
+                  | ( )                   | |    
+   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
+  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
  | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
   \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
    """ + info + """
