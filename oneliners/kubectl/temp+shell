@@ -1,0 +1,4 @@
+# ▲0 oneliners.sh/kubectl/temp+shell
+# purpose: this shell self-distructs upon exit
+# usage: as is
+kubectl run my-tmp-shell --rm -i --tty --image ubuntu:latest -- bash
