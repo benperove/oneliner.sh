@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 responder = "*"
 redis = "*"
+py-oauth2 = "*"
+pygithub = "*"
 
 [requires]
 python_version = "3.7"

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cd89fe593683fb49f564608aba2e734e483bd7162f558849010f98944c1f82a0"
+            "sha256": "072e0ff69340bc654f8984e3e4008df3efba212461a2e12055188188bb046b7b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -77,6 +77,13 @@
                 "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"
             ],
             "version": "==7.0"
+        },
+        "deprecated": {
+            "hashes": [
+                "sha256:8bfeba6e630abf42b5d111b68a05f7fe3d6de7004391b3cd614947594f87a4ff",
+                "sha256:b784e0ca85a8c1e694d77e545c10827bd99772392e79d5f5442e761515a1246e"
+            ],
+            "version": "==1.2.4"
         },
         "docopt": {
             "hashes": [
@@ -196,6 +203,27 @@
                 "sha256:348f5f6c3edd4fd47c9cd65aed03ac1b31136d375aa63871a57d3e444c85655c"
             ],
             "version": "==2.2.1"
+        },
+        "py-oauth2": {
+            "hashes": [
+                "sha256:9a5a12a38f98afca008f81ca412125d576d053cd73f2d61b574be8a65309f515"
+            ],
+            "index": "pypi",
+            "version": "==0.0.10"
+        },
+        "pygithub": {
+            "hashes": [
+                "sha256:5d3e3bdee80be63a1e5aaca5689ff450a4e7f7dfac728577fdb9caac080c5479"
+            ],
+            "index": "pypi",
+            "version": "==1.43.4"
+        },
+        "pyjwt": {
+            "hashes": [
+                "sha256:5c6eca3c2940464d106b99ba83b00c6add741c9becaec087fb7ccdefea71350e",
+                "sha256:8d59a976fb773f3e6a39c85636357c4f0e242707394cadadd9814f5cbaa20e96"
+            ],
+            "version": "==1.7.1"
         },
         "python-multipart": {
             "hashes": [
@@ -331,6 +359,12 @@
                 "sha256:42133ddd5229eeb6a0c9899496bdbe56c292394bf8666da77deeb27454c0456a"
             ],
             "version": "==4.1.2"
+        },
+        "wrapt": {
+            "hashes": [
+                "sha256:e03f19f64d81d0a3099518ca26b04550026f131eced2e76ced7b85c6b8d32128"
+            ],
+            "version": "==1.11.0"
         }
     },
     "develop": {}
