@@ -1,2 +1,4 @@
 responder
 redis
+py-oauth2
+pygithub
