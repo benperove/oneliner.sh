@@ -5,3 +5,4 @@ share/vim/.vim/
 share/vim/.viminfo
 typescript
 venv/
+secrets.py
