@@ -16,8 +16,8 @@ services:
 #      - docker-ce
 
 before_install:
-#  - sudo apt-get update && sudo apt-get install -y python3.7-pip python3.7-dev
-  - pip install pipenv
+  - sudo apt-get update && sudo apt-get install -y python3-pip python3-dev
+  - sudo pip install pipenv
   - pipenv install
   - docker build -t alphageek/oneliner.sh .
   - docker tag oneliner.sh:latest alphageek/oneliner.sh
