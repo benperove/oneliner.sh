@@ -99,7 +99,8 @@ def get_answer(cat, name=None):
                  slug    = line1[2].split('/')[2]
                  lst     += [[slug, upvotes]]
             nl = sorted(lst, key=lambda k: k[1], reverse=True)
-            #build the return string in the correct order
+            #del nl[10:] #return only top 10 results
+            #build the return string using the sorted list
             for n in nl:
                 if cache_read(cat + '/' + n[0]) is not None:
                     ar += cache_read(cat + '/' + n[0]) + '\n' 
