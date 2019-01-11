@@ -2,9 +2,11 @@
 #oneliner.sh
 #benperove@gmail.com
 
-import responder, redis, time, config, os, re
+import responder, redis, time, config, secrets, os, re
 from os import listdir
 from os.path import isdir, isfile, join
+from pyoauth2 import Client
+from github import Github
 
 api   = responder.API()
 redis = redis.StrictRedis(
@@ -49,11 +51,43 @@ async def vote(req, resp, *, cat, name):
     else:
         resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
 
+#github login
+@api.route("/login")
+async def github_login(req, resp):
+    global client
+    global access_token
+    client = Client(secrets.KEY, secrets.SECRET,
+                site='https://api.github.com',
+                authorize_url='https://github.com/login/oauth/authorize',
+                token_url='https://github.com/login/oauth/access_token')
+    authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope='user,public_repo')
+    r = 'Go to the following link in your browser:\n\n'
+    r +=  authorize_url + '\n\n'
+    resp.text = logo(ip, time.time()) + r
+
+#github oauth2 callback
+@api.route("/oauth2")
+async def github_callback(req, resp):
+     code         = req.params['code']
+     code         = code.strip()
+     access_token = client.auth_code.get_token(code, redirect_uri=config.CALLBACK, parse='query')
+     ret          = access_token.get('/user')
+     print(ret.parsed)
+     resp.text = 'Welcome, ' + ret.parsed['login'] + '!'
+     cache_write('sessions:' + ret.parsed['login'], access_token.headers['Authorization'])
+
+#check login
+@api.route("/me")
+async def me(req, resp):
+    token     = cache_read('sessions:benperove').split(' ')[1]
+    g         = Github(token)
+    resp.text = g.get_user().name + ' is authenticated'
+
 #record vote
 def record_upvote(cat, name):
     with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
         data      = fin.readlines()
-        votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
+        votes     = data[0].split(' ')[1][1:] #strip the arrow symbolfrom col 2
         v         = int(votes) + 1
         data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + name + '/upvote\n'
         has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + name)
@@ -99,11 +133,10 @@ def get_answer(cat, name=None):
                  slug    = line1[2].split('/')[2]
                  lst     += [[slug, upvotes]]
             nl = sorted(lst, key=lambda k: k[1], reverse=True)
-            #del nl[10:] #return only top 10 results
-            #build the return string using the sorted list
+            #build the return string in the correct order
             for n in nl:
                 if cache_read(cat + '/' + n[0]) is not None:
-                    ar += cache_read(cat + '/' + n[0]) + '\n' 
+                    ar += cache_read(cat + '/' + n[0]) + '\n'
                 else:
                     ar += read_file(cat, n[0]) + '\n'
             return ar
@@ -219,12 +252,12 @@ def time_elapsed(start_time):
 #print logo
 def logo(ip=None, start_time=None):
     info = col(ip, 'f_blue') + col(' in ', 'f_white') + col(str(time_elapsed(start_time)), 'f_light_blue') + col(' seconds', 'f_white')
-    logo = """                   _                       _      
-                  | ( )                   | |     
-   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__   
-  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \  
- | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | | 
-  \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_| 
+    logo = """                   _                       _
+                  | ( )                   | |
+   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__
+  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \
+ | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
+  \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
    """ + info + """
 
 """
