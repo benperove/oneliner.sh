@@ -89,12 +89,22 @@ def get_answer(cat, name=None):
         else:
             #name not found in category
             #instead of returning name suggestions, return everything
-            ar = ''
-            for n in f1:
-                if cache_read(cat + '/' + n) is not None:
-                    ar += cache_read(cat + '/' + n) + '\n'
+            #first create a list sorted by upvotes
+            ar  = ''
+            lst = []
+            for s in f1:
+                 fc      = read_file(cat, s)
+                 line1   = fc.split('\n')[0].split(' ')
+                 upvotes = line1[1][1:]
+                 slug    = line1[2].split('/')[2]
+                 lst     += [[slug, upvotes]]
+            nl = sorted(lst, key=lambda k: k[1], reverse=True)
+            #build the return string in the correct order
+            for n in nl:
+                if cache_read(cat + '/' + n[0]) is not None:
+                    ar += cache_read(cat + '/' + n[0]) + '\n' 
                 else:
-                    ar += read_file(cat, n) + '\n'
+                    ar += read_file(cat, n[0]) + '\n'
             return ar
     #category not found
     return suggest_cat(cat, dirs)
