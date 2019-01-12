@@ -16,7 +16,8 @@ server {
 }
 
 server {
- listen 0.0.0.0:443 ssl http2;
+ listen 443 ssl http2;
+ listen [::]:443 ssl http2;
  
  # SSL config
  ssl on;
