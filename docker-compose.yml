@@ -15,18 +15,30 @@ services:
     environment:
       REDIS_HOST: 'redis'
     ports:
-      - '80:80'
-    networks:
-     - oneliner
-  openresty:
-    image: openresty:latest
-    container_name: openresty
-    ports:
       - '8080'
+    networks:
+      - oneliner
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - '80:80'
+    environment:
+      HOST_NAME: 'oneliner.sh'
+      APP_PORT: '8080'
     volumes:
       - certs:/etc/letsencrypt
     networks:
       - oneliner
+#  openresty:
+#    image: openresty:latest
+#    container_name: openresty
+#    ports:
+#      - '8080'
+#    volumes:
+#      - certs:/etc/letsencrypt
+#    networks:
+#      - oneliner
 
 volumes:
   certs:

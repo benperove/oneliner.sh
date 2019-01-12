@@ -1,0 +1,16 @@
+version: '3'
+services:
+  certbot:
+    image: certbot/certbot
+#    image: certbot/dns-route53
+    container_name: certbot
+    command: certonly -n --agree-tos --standalone --email opes@cloudoptimus.com -d oneliner.sh
+#    command: certbot certonly -n --agree-tos --email ops@cloudoptimus.com --dns-route53 -d oneliner.sh
+    ports:
+      - '80:80'
+    volumes:
+      - certs:/etc/letsencrypt
+      - /home/ben/.aws/credentials:/root/.aws/credentials
+
+volumes:
+  certs:
