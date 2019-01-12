@@ -24,7 +24,7 @@ server {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    proxy_pass http://app:$APP_PORT;
+    proxy_pass http://oneliner:$APP_PORT;
     
     proxy_buffering off;
     client_max_body_size 0;
