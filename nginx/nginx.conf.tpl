@@ -3,7 +3,7 @@ server {
 	listen [::]:80;
     server_name ${HOST_NAME};
 
-	location ~ /(login|oauth2|me)$ {
+	location ~ /(oauth2|me)$ {
 		return 301 https://$host$request_uri;
 	}
 
