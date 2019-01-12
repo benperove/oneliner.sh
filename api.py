@@ -18,8 +18,9 @@ redis = redis.StrictRedis(
 @api.route(before_request=True)
 def prepare_headers(req, resp):
     global ip
-    ip = req._starlette.client.host
-    resp.headers['x-pizza'] = 'delicious'
+    ip = req._starlette.client.host #standalone
+    ip = req.headers['x-real-ip'] #nginx proxy
+    resp.headers['x-pizza'] = 'delicious' #always
 
 #requests for the main page
 @api.route("/")

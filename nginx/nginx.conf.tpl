@@ -3,7 +3,7 @@ server {
 	listen [::]:80;
     server_name ${HOST_NAME};
 
-	location ^~ /(login|oauth2|me) {
+	location ~ /(login|oauth2|me)$ {
 		return 301 https://$host$request_uri;
 	}
 
@@ -22,7 +22,6 @@ server {
  listen [::]:443 ssl http2;
  
  # SSL config
- ssl on;
  ssl_certificate /etc/letsencrypt/live/${HOST_NAME}/fullchain.pem;
  ssl_certificate_key /etc/letsencrypt/live/${HOST_NAME}/privkey.pem;
 
