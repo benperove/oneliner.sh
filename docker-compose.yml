@@ -10,7 +10,7 @@ services:
       - oneliner
   api:
     build: .
-    image: oneliner:latest
+#    image: alphageek/oneliner.sh:latest
     container_name: oneliner
     environment:
       REDIS_HOST: 'redis'
@@ -18,5 +18,17 @@ services:
       - '80:80'
     networks:
      - oneliner
+  openresty:
+    image: openresty:latest
+    container_name: openresty
+    ports:
+      - '8080'
+    volumes:
+      - certs:/etc/letsencrypt
+    networks:
+      - oneliner
+
+volumes:
+  certs:
 networks:
   oneliner:
