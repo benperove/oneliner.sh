@@ -1,5 +1,5 @@
 FROM kennethreitz/pipenv
-ENV PORT '80'
+ENV PORT '8080'
 COPY . /app
 CMD python3 api.py
-EXPOSE 80
+EXPOSE 8080
