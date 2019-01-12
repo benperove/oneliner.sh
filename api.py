@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-#oneliner.sh
-#benperove@gmail.com
 
 import responder, redis, time, config, secrets, os, re
+import hmac, hashlib, base64
 from os import listdir
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
@@ -51,6 +50,11 @@ async def vote(req, resp, *, cat, name):
     else:
         resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
 
+#process shared oneliners
+@api.route("/share")
+async def share(req, resp):
+    resp.media = {"test": 123}
+
 #github login
 @api.route("/login")
 async def github_login(req, resp):
@@ -68,20 +72,40 @@ async def github_login(req, resp):
 #github oauth2 callback
 @api.route("/oauth2")
 async def github_callback(req, resp):
-     code         = req.params['code']
-     code         = code.strip()
+     code   = req.params['code']
+     code   = code.strip()
+     client = Client(secrets.KEY, secrets.SECRET,
+                site=config.SITE,
+                authorize_url=config.AUTHORIZE_URL,
+                token_url=config.TOKEN_URL)
      access_token = client.auth_code.get_token(code, redirect_uri=config.CALLBACK, parse='query')
      ret          = access_token.get('/user')
-     print(ret.parsed)
-     resp.text = 'Welcome, ' + ret.parsed['login'] + '!'
-     cache_write('sessions:' + ret.parsed['login'], access_token.headers['Authorization'])
+     session_id   = gen_session()
+     cache_write('sessions:' + session_id, access_token.headers['Authorization'])
+     cookie       = """cat < ~/.oneliner.sh.cookie.txt << EOF\n
+oneliner.sh FALSE   /me FALSE   0   session """ + session_id + """\n
+EOF
+
+---
+and then run:\n
+curl -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
+"""
+     resp.text    = 'Welcome, ' + ret.parsed['login'] + '!\n\n' + cookie
 
 #check login
 @api.route("/me")
 async def me(req, resp):
-    token     = cache_read('sessions:benperove').split(' ')[1]
+    cookie    = req.headers['cookie'].split('session=').pop(1)
+    token     = cache_read('sessions:' + cookie).split(' ')[1]
     g         = Github(token)
     resp.text = g.get_user().name + ' is authenticated'
+
+#generate session
+def gen_session():
+    message   = bytes(ip, 'utf-8')
+    secret    = bytes(secrets.SECRET, 'utf-8')
+    signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
+    return signature
 
 #record vote
 def record_upvote(cat, name):
