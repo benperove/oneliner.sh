@@ -1,10 +1,22 @@
 server {
-  listen 80;
-  return 301 https://$host$request_uri;
+	listen 80;
+	listen [::]:80;
+    server_name ${HOST_NAME};
+
+	proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_pass http://oneliner:$APP_PORT;  
+
+	location ^~ /(login|oauth2|me) {
+		return 301 https://$host$request_uri;
+	}
 }
 
 server {
- listen 0.0.0.0:443 ssl;
+ listen 0.0.0.0:443 ssl http2;
  
  # SSL config
  ssl on;
