@@ -8,8 +8,8 @@ server {
  
  # SSL config
  ssl on;
- ssl_certificate /etc/nginx/certs/live/${HOST_NAME}/fullchain.pem;
- ssl_certificate_key /etc/nginx/certs/live/${HOST_NAME}/privkey.pem;
+ ssl_certificate /etc/letsencrypt/live/${HOST_NAME}/fullchain.pem;
+ ssl_certificate_key /etc/letsencrypt/live/${HOST_NAME}/privkey.pem;
 
  
  location / {
