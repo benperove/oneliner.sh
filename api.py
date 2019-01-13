@@ -94,6 +94,18 @@ EOF
 and then run:<br>
 curl -b ~/.oneliner.sh.cookie.txt https://oneliner.sh/me
 </textarea>
+<button id="copy-button">Copy</button>
+
+<script>
+    var input  = document.getElementById("input");
+    var button = document.getElementById("copy-button");
+
+    button.addEventListener("click", function (event) {
+        event.preventDefault();
+        input.select();
+        document.execCommand("copy");
+    });
+</script>
 """
      resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
 
