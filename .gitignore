@@ -8,3 +8,4 @@ venv/
 secrets.py
 sites.txt
 redis/
+nginx/dhparam.pem
