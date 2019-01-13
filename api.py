@@ -83,16 +83,17 @@ async def github_callback(req, resp):
      ret          = access_token.get('/user')
      session_id   = gen_session()
      cache_write('sessions:' + session_id, access_token.headers['Authorization'])
-     cookie       = """<textarea>
-cat < ~/.oneliner.sh.cookie.txt << EOF\n
-oneliner.sh\tFALSE\t/\tFALSE\t0\tsession\t""" + session_id + """\n
+     cookie       = """<br><br><textarea>
+cat > ~/.oneliner.sh.cookie.txt << EOF
+oneliner.sh\tFALSE\t/\tFALSE\t0\tsession\t""" + session_id + """
 EOF
-</textarea>
----
-and then run:\n
+</textarea><br>
+---<br>
+and then run:<br>
 curl -b ~/.oneliner.sh.cookie.txt https://oneliner.sh/me
+</textarea>
 """
-     resp.text    = 'Welcome, ' + ret.parsed['login'] + '!\n\n' + cookie
+     resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
 
 #check login
 @api.route("/me")
@@ -107,7 +108,7 @@ def gen_session():
     message   = bytes(ip, 'utf-8')
     secret    = bytes(secrets.SECRET, 'utf-8')
     signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
-    return signature
+    return signature.decode('utf-8')
 
 #record vote
 def record_upvote(cat, name):
