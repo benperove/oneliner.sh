@@ -287,7 +287,7 @@ def time_elapsed(start_time):
 
 #print logo
 def logo(ip=None, start_time=None):
-    info = '🤓 ' + col(col(ip, 'c_dark_blue'), 'bold') \
+    info = col(col(ip, 'c_dark_blue'), 'bold') \
         + col(' in ', 'f_white') \
         + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
         + col(' seconds ', 'f_white') \
