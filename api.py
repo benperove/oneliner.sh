@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-
+"""
+oneliner.sh
+"""
 import responder, redis, time, config, secrets, os, re
 import hmac, hashlib, base64
 from os import listdir
@@ -156,11 +158,11 @@ def get_answer(cat, name=None):
             ar  = ''
             lst = []
             for s in f1:
-                 fc      = read_file(cat, s)
-                 line1   = fc.split('\n')[0].split(' ')
-                 upvotes = line1[1][1:]
-                 slug    = line1[2].split('/')[2]
-                 lst     += [[slug, upvotes]]
+                fc      = read_file(cat, s)
+                line1   = fc.split('\n')[0].split(' ')
+                upvotes = line1[1][1:]
+                slug    = line1[2].split('/')[2]
+                lst     += [[slug, upvotes]]
             nl = sorted(lst, key=lambda k: k[1], reverse=True)
             #build the return string in the correct order
             for n in nl:
@@ -196,6 +198,7 @@ def suggest_names(cat, name, suggestions):
 
 #color formatting
 def col(text, color=None):
+    """asdasd"""
     c = {
         #background
         'b_black'       : '40',
@@ -284,12 +287,12 @@ def time_elapsed(start_time):
 
 #print logo
 def logo(ip=None, start_time=None):
-    info = col(col(ip, 'c_dark_blue'), 'bold') \
+    info = '🤓 ' + col(col(ip, 'c_dark_blue'), 'bold') \
         + col(' in ', 'f_white') \
         + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
         + col(' seconds ', 'f_white') \
         + col(col('v' + version, 'c_light_green'), 'bold')
-    logo = """                   _                       _     
+    logo = r"""                   _                       _     
                   | ( )                   | |    
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
   / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
