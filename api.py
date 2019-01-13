@@ -7,8 +7,9 @@ from os.path import isdir, isfile, join
 from pyoauth2 import Client
 from github import Github
 
-api   = responder.API()
-redis = redis.StrictRedis(
+version = '0.9.4'
+api     = responder.API()
+redis   = redis.StrictRedis(
             host=config.REDIS_HOST,
             port=config.REDIS_PORT,
             db=config.REDIS_DB)
@@ -54,7 +55,8 @@ async def vote(req, resp, *, cat, name):
 #process shared oneliners
 @api.route("/share")
 async def share(req, resp):
-    resp.media = {"test": 123}
+#    resp.media = {"test": 123}
+    return app.send_static_file('index.html')	
 
 #github login
 @api.route("/login")
@@ -194,7 +196,7 @@ def suggest_names(cat, name, suggestions):
 
 #color formatting
 def col(text, color=None):
-    c = {
+c = {
         #background
         'b_black'       : '40',
         'b_blue'        : '44',
@@ -224,6 +226,10 @@ def col(text, color=None):
         'f_light_red'   : '1;31',
         'f_white'       : '1;37',
         'f_yellow'      : '1;33',
+        #custom foreground
+        'c_dark_blue'   : '38;5;27',
+        'c_light_blue'  : '38;5;39',
+        'c_light_green' : '38;5;82',
         #special
         'blink'         : '5',
         'bold'          : '1',
@@ -278,7 +284,11 @@ def time_elapsed(start_time):
 
 #print logo
 def logo(ip=None, start_time=None):
-    info = col(ip, 'f_blue') + col(' in ', 'f_white') + col(str(time_elapsed(start_time)), 'f_light_blue') + col(' seconds', 'f_white')
+    info = col(col(ip, 'c_dark_blue'), 'bold') \
+        + col(' in ', 'f_white') \
+        + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
+        + col(' seconds ', 'f_white') \
+        + col(col('v' + version, 'c_light_green'), 'bold')
     logo = """                   _                       _     
                   | ( )                   | |    
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
