@@ -3,6 +3,10 @@ server {
 	listen [::]:80;
     server_name ${HOST_NAME};
 
+	location ~ (.php)$ {
+		deny all;
+	}
+
 	location ~ /(oauth2|me)$ {
 		return 301 https://$host$request_uri;
 	}
@@ -10,7 +14,6 @@ server {
 	location / {
 		proxy_pass_request_headers on;
 		proxy_set_header Host $host;
-        proxy_set_header Cookie $http_cookie;
 		proxy_set_header X-Real-IP $remote_addr;
 		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 		proxy_set_header X-Forwarded-Proto $scheme;
@@ -26,6 +29,10 @@ server {
  
 	ssl_certificate /etc/letsencrypt/live/${HOST_NAME}/fullchain.pem;
 	ssl_certificate_key /etc/letsencrypt/live/${HOST_NAME}/privkey.pem;
+
+	location ~ (.php)$ {
+		deny all;
+	}
 
 	location / {
         proxy_pass_request_headers on;
