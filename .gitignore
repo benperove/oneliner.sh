@@ -7,3 +7,4 @@ typescript
 venv/
 secrets.py
 sites.txt
+redis/
