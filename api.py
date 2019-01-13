@@ -58,7 +58,7 @@ async def vote(req, resp, *, cat, name):
 @api.route("/share")
 async def share(req, resp):
 #    resp.media = {"test": 123}
-    return app.send_static_file('index.html')	
+    return api.send_static_file('index.html')	
 
 #github login
 @api.route("/login")
