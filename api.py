@@ -83,13 +83,14 @@ async def github_callback(req, resp):
      ret          = access_token.get('/user')
      session_id   = gen_session()
      cache_write('sessions:' + session_id, access_token.headers['Authorization'])
-     cookie       = """cat < ~/.oneliner.sh.cookie.txt << EOF\n
-oneliner.sh FALSE   /me FALSE   0   session """ + session_id + """\n
+     cookie       = """<textarea>
+cat < ~/.oneliner.sh.cookie.txt << EOF\n
+oneliner.sh\tFALSE\t/\tFALSE\t0\tsession\t""" + session_id + """\n
 EOF
-
+</textarea>
 ---
 and then run:\n
-curl -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
+curl -b ~/.oneliner.sh.cookie.txt https://oneliner.sh/me
 """
      resp.text    = 'Welcome, ' + ret.parsed['login'] + '!\n\n' + cookie
 
