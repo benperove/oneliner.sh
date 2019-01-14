@@ -129,7 +129,7 @@ async def me(req, resp):
     resp.text = g.get_user().name + ' is authenticated'
 
 def is_loggedin(req):
-    if req.headers['cookie'] is not None:
+    if 'cookie' in req.headers:
         cookie = req.headers['cookie'].split('session=').pop(1)
         if cookie is not None:
             if cache_read('sessions:' + cookie) is not None:
