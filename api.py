@@ -129,22 +129,30 @@ async def me(req, resp):
     resp.text = g.get_user().name + ' is authenticated'
 
 def is_loggedin(req):
-    cookie = req.headers['cookie'].split('session=').pop(1)
-    if cookie is not None:
-        token = cache_read('sessions:' + cookie).split(' ')[1]
-        if token is not None:
-            g = Github(token)
-            if g is not None:
-                print('is_loggedin(): true')
-                return True
+    if req.headers['cookie'] is not None:
+        cookie = req.headers['cookie'].split('session=').pop(1)
+        if cookie is not None:
+            if cache_read('sessions:' + cookie) is not None:
+                token = cache_read('sessions:' + cookie).split(' ')[1]
+                if token is not None:
+                    g = Github(token)
+                    if g:
+                        print('is_loggedin(): true')
+                        return True
+                    else:
+                        print('is_loggedin(): false')
+                        return False
+                else:
+                    print('is_loggedin(): token is false')
+                    return False
             else:
-                print('is_loggedin(): false')
-                return False
+                print('is_loggedin(): token is false')
+                return False                    
         else:
-            print('is_loggedin(): token is false')
+            print('is_loggedin(): cookie is false')
             return False
     else:
-        print('is_loggedin(): cookie is false')
+        print('is_loggedin(): no cookie sent')
         return False
 
 #generate session
