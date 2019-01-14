@@ -1,0 +1,5 @@
+# ▲0 
+# purpose: get the latest repository release tag
+# usage: set the variable
+# repo=<account/reponame>
+repo=docker/compose; curl -s https://api.github.com/repos/$repo/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
