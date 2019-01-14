@@ -13,7 +13,7 @@ services:
       - './redis:/data'
   api:
     build: .
-#    image: alphageek/oneliner.sh:latest
+    #image: alphageek/oneliner.sh:latest
     container_name: oneliner
     environment:
       REDIS_HOST: 'redis'
