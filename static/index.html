@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Oneliner.sh</title>
+    <meta name="description" content="Become a oneliner samurai">
+    <meta name="author" content="Benjamin Perove">
+    <!-- <link rel="stylesheet" href="css/styles.css?v=1.0"> -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<style>
+@font-face {
+	font-family: 'Operator Mono Book';
+	/* font-weight: 400; */
+	src: url("OperatorMono-Book.woff") format("woff");
+}
+body {
+	background-color: #000;
+	color: #fff;
+	font-size: 20px;
+}
+pre {
+	font-size: 20px;
+	font-family: 'Operator Mono Book';
+}
+</style>
+</head>
+<body>
+<pre>
+$ curl oneliner.sh/linux/swapfile+ubuntu
+                   _                       _
+                  | ( )                   | |
+   ___  _ __   ___| |_ _ __   ___ _ __ ___| |__
+  / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \
+ | (_) | | | |  __/ | | | | |  __/ |_ \__ \ | | |
+  \___/|_| |_|\___|_|_|_| |_|\___|_(_)|___/_| |_|
+   <span style="color: #03a9f4;">123.123.123.123</span> in <span style="color: #00bcd4;">0.00001431</span> seconds
+
+<span style="color: grey;"># ▲1 oneliner.sh/linux/swapfile+ubuntu/upvote
+# purpose: create a swapfile in ubuntu
+# usage: set variable as
+# size=< swap size in megabytes >
+# ------------------------------------</span>
+size=2048; sudo dd if=/dev/zero of=/srv/swap bs=1024k count=$size && \
+sudo chmod 0600 /srv/swap && \
+sudo mkswap /srv/swap && \
+sudo swapon /srv/swap && \
+echo '/srv/swap none swap sw 0 0' | sudo tee -a /etc/fstab && \
+echo 'vm.swappiness = 20' | sudo tee -a /etc/sysctl.conf && \
+sudo sysctl -p
+</pre>
+
+<script>
+</script>
+</body>
+</html>
