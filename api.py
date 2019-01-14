@@ -58,7 +58,11 @@ async def vote(req, resp, *, cat, name):
 @api.route("/share")
 async def share(req, resp):
 #    resp.media = {"test": 123}
-    return api.send_static_file('index.html')
+#    return api.send_static_file('index.html')
+    if is_loggedin(req):
+        resp.text = 'is logged in'
+    else:
+        resp.text = 'not logged in'
 
 def _save_oneliner(topic_name, oneliner):
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
@@ -123,6 +127,25 @@ async def me(req, resp):
     token     = cache_read('sessions:' + cookie).split(' ')[1]
     g         = Github(token)
     resp.text = g.get_user().name + ' is authenticated'
+
+def is_loggedin(req):
+    cookie = req.headers['cookie'].split('session=').pop(1)
+    if cookie is not None:
+        token = cache_read('sessions:' + cookie).split(' ')[1]
+        if token is not None:
+            g = Github(token)
+            if g is not None:
+                print('is_loggedin(): true')
+                return True
+            else:
+                print('is_loggedin(): false')
+                return False
+        else:
+            print('is_loggedin(): token is false')
+            return False
+    else:
+        print('is_loggedin(): cookie is false')
+        return False
 
 #generate session
 def gen_session():
