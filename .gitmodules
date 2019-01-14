@@ -1,6 +1,6 @@
 [submodule "nginx/nginx-ultimate-bad-bot-blocker"]
 	path = nginx/nginx-ultimate-bad-bot-blocker
-	url = git@github.com:mitchellkrogza/nginx-ultimate-bad-bot-blocker.git
+	url = https://github.com/mitchellkrogza/nginx-ultimate-bad-bot-blocker.git
 [submodule "nginx/server-configs-nginx"]
 	path = nginx/server-configs-nginx
-	url = git@github.com:h5bp/server-configs-nginx.git
+	url = https://github.com/h5bp/server-configs-nginx.git
