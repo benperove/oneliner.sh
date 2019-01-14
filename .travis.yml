@@ -32,7 +32,8 @@ env:
 #  on:
 #    branch: master
 
-install: exit 0
+install:
+  - docker ps
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -40,4 +41,3 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - docker-compose up -d
-  - docker ps
