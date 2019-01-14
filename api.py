@@ -116,8 +116,7 @@ async def github_callback(req, resp):
      cookie       = """<br><textarea style="margin: 0px; width: 569px; height: 85px;">echo "oneliner.sh FALSE / FALSE 0 session """ + session_id + """" | sed -e 's/ /\t/g' > ~/.oneliner.sh.cookie.txt
 </textarea><br>
 ---<br>
-and then run:<br><textarea>
-curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
+and then run:<br><textarea style="margin: 0px; width: 569px;height: 55px;">curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
 </textarea>
 """
      resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
