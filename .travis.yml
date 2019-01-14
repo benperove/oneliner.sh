@@ -7,8 +7,8 @@ language:
 services:
   - docker
 
-#env:
-#  DOCKER_COMPOSE_VERSION: 1.23.2
+env:
+  DOCKER_COMPOSE_VERSION: 1.23.2
 
 #addons:
 #  apt:
