@@ -12,3 +12,5 @@ REDIS_PORT = 6379
 REDIS_DB   = 0
 DATA_DIR   = 'oneliners'
 DEBUG      = True
+#app
+SUBMISSION_PATH = 'oneliners/submissions'

@@ -3,7 +3,7 @@
 oneliner.sh
 """
 import responder, redis, time, config, secrets, os, re
-import hmac, hashlib, base64
+import hmac, hashlib, base64, random, string
 from os import listdir
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
@@ -58,7 +58,33 @@ async def vote(req, resp, *, cat, name):
 @api.route("/share")
 async def share(req, resp):
 #    resp.media = {"test": 123}
-    return api.send_static_file('index.html')	
+    return api.send_static_file('index.html')
+
+def _save_oneliner(topic_name, oneliner):
+    nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
+    filename = topic_name.replace('/', '.') + '.' + nonce
+    filename = os.path.join(config.SUBMISSION_PATH, filename)
+    open(filename, 'w').write(oneliner)
+
+def process_post_request(req, topic):
+    for key, val in req.form.items():
+        if key == '':
+            if topic is None:
+                topic_name = "UNNAMED"
+            else:
+                topic_name = topic
+            oneliner = val
+        else:
+            if val == '':
+                if topic is None:
+                    topic_name = "UNNAMED"
+                else:
+                    topic_name = topic
+                oneliner = key
+            else:
+                topic_name = key
+                oneliner = val
+        _save_oneliner(topic_name, oneliner)
 
 #github login
 @api.route("/login")
@@ -87,10 +113,9 @@ async def github_callback(req, resp):
      ret          = access_token.get('/user')
      session_id   = gen_session()
      cache_write('sessions:' + session_id, access_token.headers['Authorization'])
-     cookie       = """<br><br><textarea>
-cat > ~/.oneliner.sh.cookie.txt << EOF
-oneliner.sh\tFALSE\t/\tFALSE\t0\tsession\t""" + session_id + """
-EOF
+     #echo "oneliner.sh FALSE / FALSE 0 session qKZU/IZMn8hup8WGYu/PZ6ZOCBYGicHsjtBFdvBtevY=" | sed -e 's/ /\t/g' > test.txt
+     cookie       = """<br><textarea>
+echo "oneliner.sh FALSE / FALSE 0 session """ + session_id + """ | sed -e 's/ /\t/g' > ~/.oneliner.sh.cookie.txt
 </textarea><br>
 ---<br>
 and then run:<br>
