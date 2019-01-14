@@ -1,0 +1,300 @@
+<html>
+<head>
+
+<link rel="stylesheet" media="all" href="https://unpkg.com/shell.js@1.0.5/dist/css/shell.min.css" />
+<link rel="stylesheet" media="all" href="https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+<link rel="stylesheet" media="all" href="https://unpkg.com/jquery.terminal/css/jquery.terminal.css" />
+<link rel="stylesheet" media="all" href="https://code.jquery.com/ui/1.12.1/themes/cupertino/jquery-ui.css" />
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://cdn.terminal.jcubic.pl/wcwidth.js"></script>
+<script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.js"></script>
+<script src="https://unpkg.com/jquery.terminal/js/jquery.mousewheel-min.js"></script>
+<script src="https://unpkg.com/js-polyfills/keyboard.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<style>
+form {
+    margin: 10px;
+}
+body .shell {
+    width: 400px;
+    height: 200px;
+}
+body .shell .terminal {
+    height: calc(100% - 29px);
+    padding: 10px;
+    /*
+     * padding bottom 0 on terminal and margin
+     * on .cmd will be in version 2.0.1
+     * that fixes FireFox issue
+     */
+    padding-bottom: 0;
+}
+body .shell .terminal .cmd {
+    margin-bottom: 10px;
+}
+.shell .typed-cursor, .shell .cursor {
+    background: transparent;
+}
+.shell > .status-bar .title {
+    cursor: move;
+}
+/*
+ * fix to shell.js to center title to free space
+ */
+.shell.windows .status-bar .title {
+    right: 106px;
+}
+@supports (--css: variables) {
+    .shell .terminal {
+        --color: #aaa;
+    }
+    .shell.ubuntu .terminal {
+        --background: #300924;
+    }
+    .shell.osx .content.terminal {
+        --background: #222;
+    }
+    .shell.light .content.terminal {
+        --background: white;
+        --color: black;
+    }
+    /*
+    * windows and custom are the last ones so
+    * they don't get overwritten by light
+    */
+    .shell.windows .content.terminal {
+        --background: black;
+        --color: white;
+        --animation: terminal-underline;
+    }   
+    .shell.custom .content.terminal {
+        --background: #292929;
+        --color: #aaa;
+    }
+}
+/*
+ * overwrite shell.js style because shell.js   
+ * selectors are stronger then terminal ones
+ */
+.cmd span.cursor {
+    animation: none;
+    width: auto;
+    background-color: var(--background, #000);
+}
+.shell terminal.content,
+.shell.osx.dark .content,
+.shell.ubuntu .content {
+    background-color: var(--background, #222) !important;
+}
+.shell .terminal.content {
+    font-size: 12px;
+}
+.cmd {
+    background-color: inherit;
+}
+@supports (--css: variables) {
+    .shell .terminal.content {
+        font-size: calc(var(--size, 1) * 12px);
+    }
+}
+/* fix for Firefox */
+.terminal > .resizer, .terminal > .font .resizer {
+    visibility: visible;
+    pointer-events: none;
+}
+.terminal::-webkit-scrollbar-track
+{
+	border: 1px solid var(--color, #aaa);
+	background-color: var(--background);
+}
+.terminal::-webkit-scrollbar
+{
+	width: 10px;
+	background-color: var(--background);
+}
+.terminal::-webkit-scrollbar-thumb
+{
+	background-color: var(--color, #aaa);
+}
+</style>
+</head>
+<body>
+<form>
+    <label for="type">Window Type:</label>
+    <select id="type">
+        <option value="osx">osx</option>
+        <option value="ubuntu" selected>ubuntu</option>
+        <option value="windows">windows</option>
+        <option value="custom">custom</option>
+    </select>
+    <label for="dark">dark</label>
+    <input type="checkbox" id="dark" checked/>
+</form>
+<!-- shell.js terminal window -->
+<div class="shell ubuntu dark shadow">
+    <div class="status-bar">
+        <div class="buttons">
+            <a href="javascript:;" class="close" title="Close">
+                <i class="fa fa-times"></i>
+            </a>
+            <a href="javascript:;" class="minimize" title="Minimize">
+                <i class="fa fa-minus"></i>
+                    
+            </a>
+            <a href="javascript:;" class="enlarge" title="Enlarge">
+                <i class="fa fa-plus"></i>
+                    
+            </a>
+                    
+        </div>
+        <div class="title">user@host: ~</div>
+    </div>
+    <div class="content"></div>
+</div>
+<script>
+var shell = $('.shell').resizable({
+    minHeight: 108,
+    minWidth: 250
+}).draggable({
+    handle: '> .status-bar .title'
+});
+var fs = {
+    children: {
+        'projects': {
+            children: {
+                'baz.txt': {
+                    path: './projects/baz.txt'
+                },
+                'quux.txt': {
+                    path: './projects/quux.txt'
+                }
+            }
+        },
+        'foo.txt': {path: './foo.txt'},
+        'bar.txt': {path: './bar.txt'}
+    }
+};
+
+var path = [];
+var cwd = fs;
+function restore_cwd(fs, path) {
+    path = path.slice();
+    while (p.length) {
+        var dir_name = p.shift();
+        if (!fs[dir_name].children) {
+            throw new Error('Internal Error Invalid directory ' +
+                            $.terminal.escape_brackets(dir_name));
+        }
+        fs = fs[dir_name];
+    }
+    return fs;
+}
+function is_dir(obj) {
+    return !!(obj && obj.children);
+}
+function is_file(obj) {
+    return !!obj && typeof obj.path === 'string';
+}
+var commands = {
+    cd: function(dir) {
+        if (dir === '..') {
+            if (!path.length) {
+                path.pop(); // remove from end
+                cwd = restore_cwd(fs, path);
+            }
+        } else if (!is_dir(cwd.children[dir])) {
+            this.error($.terminal.escape_brackets(dir) + ' is not a directory');
+        } else {
+            cwd = cwd.children[dir];
+            path.push(dir);
+        }
+    },
+    ls: function() {
+        if (!cwd.children) {
+            throw new Error('Internal Error Invalid directory');
+        }
+        var dir = Object.keys(cwd.children).map(function(key) {
+            if (is_dir(cwd.children[key])) {
+                return key + '/';
+            }
+            return key;
+        });
+        this.echo(dir.join('\n'));
+    },
+    cat: function(file) {
+        if (!is_file(cwd.children[file])) {
+            this.error($.terminal.escape_brackets(file) + " don't exists");
+        } else {
+            $.get(cwd.children[file].path, this.echo).fail(() => {
+                this.error("AJAX error can't find the file " + file);
+            });
+        }
+    },
+    help: function() {
+        this.echo('Available commands: ' + Object.keys(commands).join(', '));
+    }
+};
+var term = $('.content').terminal(commands, {
+    prompt: prompt(),
+    completion: function(string, callback) {
+        var command = this.get_command();
+        var cmd = $.terminal.parse_command(command);
+        if (cmd.name === 'ls') {
+            callback([]);
+        } else if (cmd.name === 'cd') {
+            var dirs = Object.keys(cwd.children).filter(function(key) {
+                return is_dir(cwd.children[key]);
+            });
+            callback(dirs);
+        } else if (cmd.name === 'cat') {
+            var files = Object.keys(cwd.children).filter(function(key) {
+                return is_file(cwd.children[key]);
+            });
+            callback(files);
+        } else {
+            callback(Object.keys(commands));
+        }
+    },
+    // detect iframe codepen preview
+    enabled: $('body').attr('onload') === undefined,
+});
+// for codepen preview
+if (!term.enabled()) {
+    term.find('.cursor').addClass('blink');
+}
+function prompt(type) {
+    return function(callback) {
+        var prompt;
+        if (type === 'windows') {
+            prompt = 'C:\\' + path.join('\\') + '> ';
+        } else {
+            prompt = 'user@host:/' + path.join('/') + '$ ';
+        }
+        $('.title').html(prompt);
+        callback(prompt);
+    };
+}
+$('#type').on('change', function() {
+    shell.removeClass('osx windows ubuntu default custom').addClass(this.value);
+    term.toggleClass('underline-animation', this.value == 'windows');
+    term.set_prompt(prompt(this.value));
+});
+$('#dark').on('change', function() {
+    shell.removeClass('dark light');
+    if (this.checked) {
+        shell.addClass('dark');
+    } else {
+        shell.addClass('light');
+    }
+});
+$('#type, #dark').on('change', function() {
+    setTimeout(function() {
+        term.focus();
+    }, 400)
+});
+github('jcubic/jquery.terminal');
+</script>
+</body>
+</html>
