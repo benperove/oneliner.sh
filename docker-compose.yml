@@ -14,7 +14,7 @@ services:
   api:
     build: .
 #    image: alphageek/oneliner.sh:latest
-    container_name: oneliner
+    container_name: oneliner:latest
     environment:
       REDIS_HOST: 'redis'
     ports:
