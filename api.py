@@ -113,10 +113,11 @@ async def github_callback(req, resp):
      ret          = access_token.get('/user')
      session_id   = gen_session()
      cache_write('sessions:' + session_id, access_token.headers['Authorization'])
-     cookie       = """<br><textarea style="margin: 0px; width: 569px; height: 85px;">echo "oneliner.sh FALSE / FALSE 0 session """ + session_id + """" | sed -e 's/ /\t/g' > ~/.oneliner.sh.cookie.txt
+     cookie       = """<br>
+run this to save your login cookie:<br><textarea style="margin: 0px; width: 569px; height: 85px;">echo "oneliner.sh FALSE / FALSE 0 session """ + session_id + """" | sed -e 's/ /\t/g' > ~/.oneliner.sh.cookie.txt
 </textarea><br>
 ---<br>
-and then run:<br><textarea style="margin: 0px; width: 569px;height: 55px;">curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
+and then to verify your session, run:<br><textarea style="margin: 0px; width: 569px;height: 55px;">curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me
 </textarea>
 """
      resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
