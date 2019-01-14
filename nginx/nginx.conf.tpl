@@ -7,6 +7,10 @@ server {
 		deny all;
 	}
 
+#	if ($http_user_agent ~* "curl") {
+#		rewrite ^/(.*)$ https://${HOST_NAME}/$1 permanent;
+#	}
+
 	location ~ /(oauth2|me)$ {
 		return 301 https://$host$request_uri;
 	}
