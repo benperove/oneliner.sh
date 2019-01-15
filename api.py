@@ -63,19 +63,27 @@ async def share(req, resp, *, cat, name):
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
-        user     = me(req, resp)
+        user     = await me(req, resp)
+        userid   = user.login
         oneliner = await req._starlette.body()
         oneliner = oneliner.decode('utf-8')
-        if process_post_request(cat, name, oneliner):
-            resp.text = cat + '/' + name + ' added to the queue by ' + user.name()
+        if process_post_request(cat, name, oneliner, userid):
+            resp.text = cat + '/' + name + ' added to the queue by ' + userid
         else:
             resp.text = 'error'
     else:
         resp.text = ls
 
-def process_post_request(cat, name, oneliner):
-    
-    if save_oneliner(cat, name, oneliner):
+def process_post_request(cat, name, oneliner, userid):
+    header = """
+# ▲0 oneliner.sh/""" + cat + '/' + 'name' + '/upvote'"""
+# purpose:
+# usage: as is
+# variables: 
+# contributor: """ + userid + """
+# """ + print('-' * 70)
+    h_oneliner = header + oneliner
+    if save_oneliner(cat, name, h_oneliner):
         return True
     else:
         return False
