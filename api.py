@@ -58,13 +58,16 @@ async def vote(req, resp, *, cat, name):
         resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
 
 #process shared oneliners
-@api.route("/{cat}/{name}/incoming")
+@api.route("/{cat}/{name}/add")
 async def share(req, resp, *, cat, name):
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
 		oneliner = await req._starlette.body()
-        process_post_request(cat, name, oneliner)
+        if process_post_request(cat, name, oneliner):
+            resp.text = 'added!'
+        else:
+            resp.text = 'error'
     else:
         resp.text = ls
 
