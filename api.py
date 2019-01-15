@@ -58,40 +58,28 @@ async def vote(req, resp, *, cat, name):
         resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
 
 #process shared oneliners
-@api.route("/share")
-async def share(req, resp):
+@api.route("/{cat}/{name}/incoming")
+async def share(req, resp, *, cat, name):
     ls = is_loggedin(req)
     if ls is True:
-        resp.text = 'is logged in'
+        #resp.text = 'is logged in'
+		oneliner = await req._starlette.body()
+        process_post_request(cat, name, oneliner)
     else:
         resp.text = ls
 
-def process_post_request(req, topic):
-    for key, val in req.form.items():
-        if key == '':
-            if topic is None:
-                topic_name = "UNNAMED"
-            else:
-                topic_name = topic
-            oneliner = val
-        else:
-            if val == '':
-                if topic is None:
-                    topic_name = "UNNAMED"
-                else:
-                    topic_name = topic
-                oneliner = key
-            else:
-                topic_name = key
-                oneliner = val
-        save_oneliner(topic_name, oneliner)
+def process_post_request(cat, name, oneliner):
+    save_oneliner(cat, name, oneliner)
 
-def save_oneliner(topic_name, oneliner):
+def save_oneliner(cat, name, oneliner):
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
     filename = topic_name.replace('/', '.') + '.' + nonce
     filename = os.path.join(config.SUBMISSION_PATH, filename)
-    open(filename, 'w').write(oneliner)
-
+    if open(filename, 'w').write(oneliner):
+        return True
+    else:
+        return False
+    
 #github login
 @api.route("/login")
 async def github_login(req, resp):
