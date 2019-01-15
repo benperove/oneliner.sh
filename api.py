@@ -75,13 +75,14 @@ async def share(req, resp, *, cat, name):
         resp.text = ls
 
 def process_post_request(cat, name, oneliner, userid):
+    rows, columns = os.popen('stty size', 'r').read().split()
     header = """
 # ▲0 oneliner.sh/""" + cat + '/' + 'name' + '/upvote'"""
 # purpose:
 # usage: as is
 # variables: 
 # contributor: """ + userid + """
-# """ + ('-' * 70)
+# """ + ('-' * (columns - 2))
     print(header)
     h_oneliner = header + oneliner
     print(h_oneliner)
