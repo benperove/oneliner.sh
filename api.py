@@ -28,9 +28,11 @@ def prepare_headers(req, resp):
 #requests for the main page
 @api.route("/")
 async def main(req, resp):
+    print(req.headers)
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
-    if re.match(r'curl', req.headers['user-agent']):
-        resp.text = logo(ip, time.time()) + 'coming soon'
+    if 'user-agent' in req.headers:
+        if re.match(r'curl', req.headers['user-agent']):
+            resp.text = logo(ip, time.time()) + 'coming soon'
     else:
         resp.text = page
     resp.text = page
