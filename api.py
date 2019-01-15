@@ -63,7 +63,9 @@ async def share(req, resp, *, cat, name):
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
-        oneliner = await req._starlette.body()
+        oneliner   = await req._starlette.body()
+        oneliner   = oneliner.decode('utf-8')
+        oneliner_p = process_post_request(cat, name, oneliner)
         if process_post_request(cat, name, oneliner):
             resp.text = 'added!'
         else:
@@ -72,7 +74,10 @@ async def share(req, resp, *, cat, name):
         resp.text = ls
 
 def process_post_request(cat, name, oneliner):
-    save_oneliner(cat, name, oneliner)
+    if save_oneliner(cat, name, oneliner):
+        return True
+    else:
+        return False
 
 def save_oneliner(cat, name, oneliner):
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
