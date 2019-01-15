@@ -4,7 +4,7 @@ oneliner.sh
 """
 import responder, redis, time, config, secrets, os, re
 import hmac, hashlib, base64, random, string
-from os import listdir, get_terminal_size
+from os import listdir
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
 from github import Github
@@ -75,14 +75,13 @@ async def share(req, resp, *, cat, name):
         resp.text = ls
 
 def process_post_request(cat, name, oneliner, userid):
-    columns, rows = get_terminal_size(0)
     header = """
 # ▲0 oneliner.sh/""" + cat + '/' + 'name' + '/upvote'"""
 # purpose:
 # usage: as is
 # variables: 
 # contributor: """ + userid + """
-# """ + ('-' * (int(columns) - 2))
+# """ + ('-' * 30) + '\n'
     h_oneliner = header + oneliner
     print(h_oneliner)
     if save_oneliner(cat, name, h_oneliner):
