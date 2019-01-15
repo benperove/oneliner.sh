@@ -32,8 +32,8 @@ async def main(req, resp):
     if 'user-agent' in req.headers:
         if re.match(r'curl', req.headers['user-agent']):
             resp.text = logo(ip, time.time()) + 'coming soon'
-    else:
-        resp.text = page
+        else:
+            resp.text = page
 
 #requests for a category
 @api.route("/{cat}")
@@ -75,6 +75,13 @@ async def share(req, resp, *, cat, name):
             resp.text = 'error'
     else:
         resp.text = ls
+
+def is_cli(req):
+    if 'user-agent' in req.headers:
+        if re.match(r'curl', req.headers['user-agent']):
+            return True
+        return False
+    return True
 
 def process_post_request(cat, name, oneliner, userid):
     header = """
