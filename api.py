@@ -63,17 +63,18 @@ async def share(req, resp, *, cat, name):
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
-        oneliner   = await req._starlette.body()
-        oneliner   = oneliner.decode('utf-8')
-        oneliner_p = process_post_request(cat, name, oneliner)
+        user     = me(req, resp)
+        oneliner = await req._starlette.body()
+        oneliner = oneliner.decode('utf-8')
         if process_post_request(cat, name, oneliner):
-            resp.text = 'added!'
+            resp.text = cat + '/' + name + ' added to the queue by ' + user.name()
         else:
             resp.text = 'error'
     else:
         resp.text = ls
 
 def process_post_request(cat, name, oneliner):
+    
     if save_oneliner(cat, name, oneliner):
         return True
     else:
@@ -122,10 +123,12 @@ async def github_callback(req, resp):
 #check login
 @api.route("/me")
 async def me(req, resp):
-    cookie    = req.headers['cookie'].split('session=').pop(1)
-    token     = cache_read('sessions:' + cookie).split(' ')[1]
-    g         = Github(token)
+    cookie = req.headers['cookie'].split('session=').pop(1)
+    token  = cache_read('sessions:' + cookie).split(' ')[1]
+    g      = Github(token)
+    #return g.get_user()
     resp.text = g.get_user().name + ' is authenticated'
+    return g.get_user()
 
 def is_loggedin(req):
     if 'cookie' in req.headers:
