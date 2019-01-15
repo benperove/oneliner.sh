@@ -81,7 +81,8 @@ def process_post_request(cat, name, oneliner):
 
 def save_oneliner(cat, name, oneliner):
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
-    filename = topic_name.replace('/', '.') + '.' + nonce
+    fn       = cat + '/' + name
+    filename = fn.replace('/', '.') + '.' + nonce
     filename = os.path.join(config.SUBMISSION_PATH, filename)
     if open(filename, 'w').write(oneliner):
         return True
