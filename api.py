@@ -29,9 +29,11 @@ def prepare_headers(req, resp):
 @api.route("/")
 async def main(req, resp):
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
-#    resp.text = logo(ip, time.time()) + 'coming soon'
+    if re.match(r'curl', req.headers['user-agent']):
+        resp.text = logo(ip, time.time()) + 'coming soon'
+    else:
+        resp.text = page
     resp.text = page
-    #resp.text = logo(ip, time.time()) + 'coming soon'
 
 #requests for a category
 @api.route("/{cat}")
