@@ -28,7 +28,10 @@ def prepare_headers(req, resp):
 #requests for the main page
 @api.route("/")
 async def main(req, resp):
-    resp.text = logo(ip, time.time()) + 'coming soon'
+    page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
+#    resp.text = logo(ip, time.time()) + 'coming soon'
+    resp.text = page
+    #resp.text = logo(ip, time.time()) + 'coming soon'
 
 #requests for a category
 @api.route("/{cat}")
@@ -63,12 +66,6 @@ async def share(req, resp):
     else:
         resp.text = ls
 
-def _save_oneliner(topic_name, oneliner):
-    nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
-    filename = topic_name.replace('/', '.') + '.' + nonce
-    filename = os.path.join(config.SUBMISSION_PATH, filename)
-    open(filename, 'w').write(oneliner)
-
 def process_post_request(req, topic):
     for key, val in req.form.items():
         if key == '':
@@ -87,7 +84,13 @@ def process_post_request(req, topic):
             else:
                 topic_name = key
                 oneliner = val
-        _save_oneliner(topic_name, oneliner)
+        save_oneliner(topic_name, oneliner)
+
+def save_oneliner(topic_name, oneliner):
+    nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
+    filename = topic_name.replace('/', '.') + '.' + nonce
+    filename = os.path.join(config.SUBMISSION_PATH, filename)
+    open(filename, 'w').write(oneliner)
 
 #github login
 @api.route("/login")
@@ -146,7 +149,7 @@ def is_loggedin(req):
                     return 'token not found in cache'
             else:
                 print('is_loggedin(): no session found in cache')
-                return 'no session found in cache'                    
+                return 'no session found in cache'
         else:
             print('is_loggedin(): cookie format is wrong')
             return 'cookie format is wrong'
