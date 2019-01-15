@@ -81,8 +81,10 @@ def process_post_request(cat, name, oneliner, userid):
 # usage: as is
 # variables: 
 # contributor: """ + userid + """
-# """ + print('-' * 70)
+# """ + ('-' * 70)
+    print(header)
     h_oneliner = header + oneliner
+    print(h_oneliner)
     if save_oneliner(cat, name, h_oneliner):
         return True
     else:
