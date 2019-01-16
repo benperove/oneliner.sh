@@ -29,9 +29,11 @@ def prepare_headers(req, resp):
 @api.route("/")
 async def main(req, resp):
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
+    txt  = '123'
     if is_cli(req):
         resp.text = logo(ip, time.time()) + 'coming soon'
     else:
+        #resp.content = api.template('terminal.html', text=txt)
         resp.text = page
 
 #requests for a category
@@ -39,28 +41,28 @@ async def main(req, resp):
 async def cat(req, resp, *, cat):
     resp.text = logo(ip, time.time()) + get_answer(cat)
 
-#requests for a category + name
-@api.route("/{cat}/{name}")
-async def cat_name(req, resp, *, cat, name):
-    resp.text = logo(ip, time.time()) + get_answer(cat, name)
+#requests for a category + command
+@api.route("/{cat}/{cmd}")
+async def cat_name(req, resp, *, cat, cmd):
+    resp.text = logo(ip, time.time()) + get_answer(cat, cmd)
 
-#requests for category + name with a json response
-@api.route("/{cat}/{name}/json")
-async def test2(req, resp, *, cat, name):
-    resp.media = {"category": cat, "name": name}
+#requests for category + command with a json response
+@api.route("/{cat}/{cmd}/json")
+async def test2(req, resp, *, cat, cmd):
+    resp.media = {"category": cat, "command": cmd}
 
-#process votes for category + name
-@api.route("/{cat}/{name}/upvote")
-async def vote(req, resp, *, cat, name):
-    upvotes = record_upvote(cat, name)
+#process votes for category + command
+@api.route("/{cat}/{cmd}/upvote")
+async def vote(req, resp, *, cat, cmd):
+    upvotes = record_upvote(cat, cmd)
     if type(upvotes) == int:
-        resp.text = logo(ip, time.time()) + get_answer(cat, name) + 'upvoted!'
+        resp.text = logo(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
     else:
-        resp.text = logo(ip, time.time()) + get_answer(cat, name) + upvotes
+        resp.text = logo(ip, time.time()) + get_answer(cat, cmd) + upvotes
 
 #process shared oneliners
-@api.route("/{cat}/{name}/add")
-async def share(req, resp, *, cat, name):
+@api.route("/{cat}/{cmd}/add")
+async def share(req, resp, *, cat, cmd):
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
@@ -68,8 +70,8 @@ async def share(req, resp, *, cat, name):
         userid   = user.login
         oneliner = await req._starlette.body()
         oneliner = oneliner.decode('utf-8')
-        if process_post_request(cat, name, oneliner, userid):
-            resp.text = cat + '/' + name + ' added to the queue by ' + userid
+        if process_post_request(cat, cmd, oneliner, userid):
+            resp.text = cat + '/' + cmd + ' added to the queue by ' + userid
         else:
             resp.text = 'error'
     else:
@@ -82,9 +84,9 @@ def is_cli(req):
         return False
     return True
 
-def process_post_request(cat, name, oneliner, userid):
+def process_post_request(cat, cmd, oneliner, userid):
     header = """
-# ▲0 oneliner.sh/""" + cat + '/' + 'name' + '/upvote'"""
+# ▲0 oneliner.sh/""" + cat + '/' + cmd + '/upvote'"""
 # purpose:
 # usage: as is
 # variables: 
@@ -92,14 +94,14 @@ def process_post_request(cat, name, oneliner, userid):
 # """ + ('-' * 30) + '\n'
     h_oneliner = header + oneliner
     print(h_oneliner)
-    if save_oneliner(cat, name, h_oneliner):
+    if save_oneliner(cat, cmd, h_oneliner):
         return True
     else:
         return False
 
-def save_oneliner(cat, name, oneliner):
+def save_oneliner(cat, cmd, oneliner):
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
-    fn       = cat + '/' + name
+    fn       = cat + '/' + cmd
     filename = fn.replace('/', '.') + '.' + nonce
     filename = os.path.join(config.SUBMISSION_PATH, filename)
     if open(filename, 'w').write(oneliner):
@@ -182,45 +184,45 @@ def gen_session():
     return signature.decode('utf-8')
 
 #record vote
-def record_upvote(cat, name):
-    with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
+def record_upvote(cat, cmd):
+    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
         data      = fin.readlines()
         votes     = data[0].split(' ')[1][1:] #strip the arrow symbolfrom col 2
         v         = int(votes) + 1
-        data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + name + '/upvote\n'
-        has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + name)
+        data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
+        has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + cmd)
         if has_voted is None:
-            cache_write_exp('upvotes:' + ip + ':/' + cat + '/' + name, time.time(), ex=86400)
-            with open(config.DATA_DIR + '/' + cat + '/' + name, 'w') as fin2:
+            cache_write_exp('upvotes:' + ip + ':/' + cat + '/' + cmd, time.time(), ex=86400)
+            with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'w') as fin2:
                 fin2.writelines(data)
-                cache_delete(cat + '/' + name)
+                cache_delete(cat + '/' + cmd)
             return v
         else:
             return 'already upvoted'
 
 #get request answer
-def get_answer(cat, name=None):
+def get_answer(cat, cmd=None):
     #get a list of all dirs/categories from data dir
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
     if cat in dirs:
         r1 = 'cat ' + cat + ' is in list\n'
         f1 = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
-        if name in f1:
-            f2 = 'name ' + name + ' is in cat ' + cat
-            f3 = cache_read(cat + '/' + name)
+        if cmd in f1:
+            f2 = 'cmd ' + cmd + ' is in cat ' + cat
+            f3 = cache_read(cat + '/' + cmd)
             #if cache miss
             if f3 == None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
-                return read_file(cat, name) + '\n'
+                return read_file(cat, cmd) + '\n'
             else:
                 #cache hit
                 print('DEBUG: cache hit') if config.DEBUG else 0
                 return f3 + '\n'
         else:
-            #name not found in category
-            #instead of returning name suggestions, return everything
+            #command not found in category
+            #instead of returning command suggestions, return everything
             #first create a list sorted by upvotes
             ar  = ''
             lst = []
@@ -242,15 +244,15 @@ def get_answer(cat, name=None):
     return suggest_cat(cat, dirs)
 
 #read file + write cache
-def read_file(cat, name):
-    fp       = open(config.DATA_DIR + '/' + cat + '/' + name, 'r')
+def read_file(cat, cmd):
+    fp       = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
     contents = fp.read()
     c2       = ''
-    with open(config.DATA_DIR + '/' + cat + '/' + name, 'r') as fin:
+    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
         for line in fin:
             c2 += colorize(line)
     #write to cache
-    cache_write(cat + '/' + name, c2)
+    cache_write(cat + '/' + cmd, c2)
     return c2
 
 #offer category suggestions
@@ -259,9 +261,9 @@ def suggest_cat(cat, dirs):
     return cat + ' not found\n' + 'suggestions: ' + cats
 
 #offer name suggestions for category
-def suggest_names(cat, name, suggestions):
-    names = ', '.join(suggestions)
-    return name + ' not found in ' + cat + '\n' + 'suggestions: ' + names
+def suggest_names(cat, cmd, suggestions):
+    cmds = ', '.join(suggestions)
+    return cmd + ' not found in ' + cat + '\n' + 'suggestions: ' + cmds
 
 #color formatting
 def col(text, color=None):
