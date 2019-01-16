@@ -31,7 +31,7 @@ async def main(req, resp):
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
-        resp.text = logo(ip, time.time()) + 'coming soon'
+        resp.text = banner(ip, time.time()) + 'coming soon'
     else:
         #resp.content = api.template('terminal.html', data=elem)
         resp.text = page
@@ -39,12 +39,12 @@ async def main(req, resp):
 #requests for a category
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
-    resp.text = logo(ip, time.time()) + get_answer(cat)
+    resp.text = banner(ip, time.time()) + get_answer(cat)
 
 #requests for a category + command
 @api.route("/{cat}/{cmd}")
 async def cat_name(req, resp, *, cat, cmd):
-    resp.text = logo(ip, time.time()) + get_answer(cat, cmd)
+    resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
 
 #requests for category + command with a json response
 @api.route("/{cat}/{cmd}/json")
@@ -56,9 +56,9 @@ async def test2(req, resp, *, cat, cmd):
 async def vote(req, resp, *, cat, cmd):
     upvotes = record_upvote(cat, cmd)
     if type(upvotes) == int:
-        resp.text = logo(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
     else:
-        resp.text = logo(ip, time.time()) + get_answer(cat, cmd) + upvotes
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
 
 #process shared oneliners
 @api.route("/{cat}/{cmd}/add")
@@ -121,7 +121,7 @@ async def github_login(req, resp):
     authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope=config.SCOPE)
     r = 'Go to the following link in your browser:\n\n'
     r +=  authorize_url + '\n\n'
-    resp.text = logo(ip, time.time()) + r
+    resp.text = banner(ip, time.time()) + r
 
 #github oauth2 callback
 @api.route("/oauth2")
@@ -187,7 +187,7 @@ def gen_session():
 def record_upvote(cat, cmd):
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
         data      = fin.readlines()
-        votes     = data[0].split(' ')[1][1:] #strip the arrow symbolfrom col 2
+        votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
         v         = int(votes) + 1
         data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
         has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + cmd)
@@ -354,14 +354,14 @@ def cache_clear():
 def time_elapsed(start_time):
     return "%02.8f" % (time.time() - start_time)
 
-#print logo
-def logo(ip=None, start_time=None):
+#print banner
+def banner(ip=None, start_time=None):
     info = col(col(ip, 'c_dark_blue'), 'bold') \
         + col(' in ', 'f_white') \
         + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
         + col(' seconds ', 'f_white') \
         + col(col('v' + version, 'c_light_green'), 'bold')
-    logo = r"""                   _                       _     
+    banner = r"""                   _                       _     
                   | ( )                   | |    
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
   / _ \| '_ \ / _ \ | | '_ \ / _ \ '__/ __| '_ \ 
@@ -370,7 +370,7 @@ def logo(ip=None, start_time=None):
    """ + info + """
 
 """
-    return logo
+    return banner
 
 #ain't nothin' to it but to do it
 if __name__ == '__main__':
