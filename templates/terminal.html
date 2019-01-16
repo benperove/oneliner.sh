@@ -1,8 +1,18 @@
 <html>
 <head>
 <title>{{ data.title }}</title>
+<style>
+body {
+	background-color: ;
+}
+</style>
 </head>
-<body>
+<body>	
+	<iframe
+  src="https://carbon.now.sh/?bg=rgba(171%2C%20184%2C%20195%2C%201)&t=nord&wt=none&l=text&ds=true&dsyoff=20px&dsblur=68px&wc=true&wa=true&pv=56px&ph=56px&ln=false&fm=Hack&fs=14px&lh=133%25&si=false&code={{ data.result }}&es=4x&wm=false"
+  style="transform:scale(0.7); width:1024px; height:473px; border:0; overflow:hidden;"
+  sandbox="allow-scripts allow-same-origin">
+</iframe>
 {{ data.body }}
 </body>
 </html>
