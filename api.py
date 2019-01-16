@@ -29,7 +29,7 @@ def prepare_headers(req, resp):
 @api.route("/")
 async def main(req, resp):
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
-    elem = {'title': 'the title', 'txt': '123'}
+    elem = {'title': 'the title', 'body': '123'}
     if is_cli(req):
         resp.text = logo(ip, time.time()) + 'coming soon'
     else:
