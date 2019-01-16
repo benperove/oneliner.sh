@@ -33,8 +33,8 @@ async def main(req, resp):
     if is_cli(req):
         resp.text = logo(ip, time.time()) + 'coming soon'
     else:
-        resp.content = api.template('terminal.html', data=elem)
-        #resp.text = page
+        #resp.content = api.template('terminal.html', data=elem)
+        resp.text = page
 
 #requests for a category
 @api.route("/{cat}")
