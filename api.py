@@ -87,8 +87,7 @@ def is_cli(req):
     return False
 
 def process_post_request(cat, cmd, oneliner, userid):
-    header = """
-# ▲0 oneliner.sh/""" + cat + '/' + cmd + '/upvote'"""
+    header = """# ▲0 oneliner.sh/""" + cat + '/' + cmd + '/upvote'"""
 # purpose:
 # usage: as is
 # variables: 
