@@ -79,10 +79,12 @@ async def share(req, resp, *, cat, cmd):
 
 def is_cli(req):
     if 'user-agent' in req.headers:
-        if re.match(r'curl', req.headers['user-agent']):
-            return True
-        return False
-    return True
+        cli_clients = ['curl', 'wget', 'fetch', 'httpie', 'lwp-request', 'openbsd ftp', 'python-requests']
+        for client in cli_clients:
+            if re.match(client, req.headers['user-agent']):
+                return True
+            return False
+    return False
 
 def process_post_request(cat, cmd, oneliner, userid):
     header = """
