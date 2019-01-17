@@ -83,7 +83,7 @@ def is_cli(req):
         for client in cli_clients:
             if re.match(client, req.headers['user-agent']):
                 return True
-            return False
+        return False
     return False
 
 def process_post_request(cat, cmd, oneliner, userid):
