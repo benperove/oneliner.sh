@@ -263,7 +263,8 @@ def suggest_cat(cat, dirs):
     return cat + ' not found\n' + 'suggestions: ' + cats
 
 #offer name suggestions for category
-def suggest_names(cat, cmd, suggestions):
+#not presently in use
+def suggest_cmd(cat, cmd, suggestions):
     cmds = ', '.join(suggestions)
     return cmd + ' not found in ' + cat + '\n' + 'suggestions: ' + cmds
 
