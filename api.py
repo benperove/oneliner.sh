@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""
-oneliner.sh
-"""
-import responder, redis, time, config, secrets, os, re
-import hmac, hashlib, base64, random, string
+"""oneliner.sh"""
+import os
+import re
+import time
+import hmac
+import hashlib
+import base64
+import random
+import string
+import responder
+import redis
+import config
+import secrets
 from os import listdir
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
@@ -16,18 +24,18 @@ redis   = redis.StrictRedis(
             port=config.REDIS_PORT,
             db=config.REDIS_DB)
 
-#set client ip address and
-#specify headers for all requests
 @api.route(before_request=True)
 def prepare_headers(req, resp):
+    """set client ip address and"""
+    """specify headers for all requests"""
     global ip
     ip = req._starlette.client.host #standalone
     ip = req.headers['x-real-ip'] #nginx proxy
     resp.headers['x-pizza'] = 'delicious' #always
 
-#requests for the main page
 @api.route("/")
 async def main(req, resp):
+    """requests for the main page"""
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
@@ -36,33 +44,39 @@ async def main(req, resp):
         #resp.content = api.template('terminal.html', data=elem)
         resp.text = page
 
-#requests for a category
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
+    """requests for a category"""
     resp.text = banner(ip, time.time()) + get_answer(cat)
 
-#requests for a category + command
 @api.route("/{cat}/{cmd}")
 async def cat_name(req, resp, *, cat, cmd):
+    """requests for a category + command"""
     resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
 
-#requests for category + command with a json response
 @api.route("/{cat}/{cmd}/json")
 async def test2(req, resp, *, cat, cmd):
+    """requests for category + command with a json response"""
     resp.media = {"category": cat, "command": cmd}
 
-#process votes for category + command
 @api.route("/{cat}/{cmd}/upvote")
 async def vote(req, resp, *, cat, cmd):
-    upvotes = record_upvote(cat, cmd)
-    if type(upvotes) == int:
-        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
-    else:
-        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
+    """process votes for category + command"""
 
-#process shared oneliners
+    @api.background.task
+    def vote(cat, cmd):
+        upvotes = record_upvote(cat, cmd)
+        if type(upvotes) == int:
+            resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
+        else:
+            resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
+
+    vote(cat, cmd)
+    resp.content = 'processing upvote...'
+
 @api.route("/{cat}/{cmd}/add")
 async def share(req, resp, *, cat, cmd):
+    """process shared oneliners"""
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
@@ -78,6 +92,7 @@ async def share(req, resp, *, cat, cmd):
         resp.text = ls
 
 def is_cli(req):
+    """determine if plaintext client in use"""
     if 'user-agent' in req.headers:
         cli_clients = ['curl', 'wget', 'fetch', 'httpie', 'lwp-request', 'openbsd ftp', 'python-requests']
         for client in cli_clients:
@@ -102,6 +117,7 @@ def process_post_request(cat, cmd, oneliner, userid):
         return False
 
 def save_oneliner(cat, cmd, oneliner):
+    """write the command to a temp file"""
     nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
     fn       = cat + '/' + cmd
     filename = fn.replace('/', '.') + '.' + nonce
@@ -111,9 +127,9 @@ def save_oneliner(cat, cmd, oneliner):
     else:
         return False
     
-#github login
 @api.route("/login")
 async def github_login(req, resp):
+    """github login"""
     global client
     global access_token
     client = Client(secrets.KEY, secrets.SECRET,
@@ -125,33 +141,34 @@ async def github_login(req, resp):
     r +=  authorize_url + '\n\n'
     resp.text = banner(ip, time.time()) + r
 
-#github oauth2 callback
 @api.route("/oauth2")
 async def github_callback(req, resp):
-     code   = req.params['code']
-     code   = code.strip()
-     client = Client(secrets.KEY, secrets.SECRET,
-                site=config.SITE,
-                authorize_url=config.AUTHORIZE_URL,
-                token_url=config.TOKEN_URL)
-     access_token = client.auth_code.get_token(code, redirect_uri=config.CALLBACK, parse='query')
-     ret          = access_token.get('/user')
-     session_id   = gen_session()
-     cache_write('sessions:' + session_id, access_token.headers['Authorization'])
-     cookie       = '<br>run this to save a cookie & verify your login:<br><textarea style="margin: 0px; width: 569px; height: 90px;">echo "oneliner.sh FALSE / FALSE 0 session ' + session_id + '" | sed -e "s/\\s/\\t/g" > ~/.oneliner.sh.cookie.txt && curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me</textarea><br>'
-     resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
+    """github oauth2 callback"""
+    code   = req.params['code']
+    code   = code.strip()
+    client = Client(secrets.KEY, secrets.SECRET,
+            site=config.SITE,
+            authorize_url=config.AUTHORIZE_URL,
+            token_url=config.TOKEN_URL)
+    access_token = client.auth_code.get_token(code, redirect_uri=config.CALLBACK, parse='query')
+    ret          = access_token.get('/user')
+    session_id   = gen_session()
+    cache_write('sessions:' + session_id, access_token.headers['Authorization'])
+    cookie       = '<br>run this to save a cookie & verify your login:<br><textarea style="margin: 0px; width: 569px; height: 90px;">echo "oneliner.sh FALSE / FALSE 0 session ' + session_id + '" | sed -e "s/\\s/\\t/g" > ~/.oneliner.sh.cookie.txt && curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me</textarea><br>'
+    resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
 
-#check login
+
 @api.route("/me")
 async def me(req, resp):
-    cookie = req.headers['cookie'].split('session=').pop(1)
-    token  = cache_read('sessions:' + cookie).split(' ')[1]
-    g      = Github(token)
-    #return g.get_user()
+    """check login"""
+    cookie    = req.headers['cookie'].split('session=').pop(1)
+    token     = cache_read('sessions:' + cookie).split(' ')[1]
+    g         = Github(token)
     resp.text = g.get_user().name + ' is authenticated'
     return g.get_user()
 
 def is_loggedin(req):
+    """determine if logged in"""
     if 'cookie' in req.headers:
         cookie = req.headers['cookie'].split('session=').pop(1)
         if cookie is not None:
@@ -178,15 +195,15 @@ def is_loggedin(req):
         print('is_loggedin(): no cookie sent')
         return 'no cookie sent'
 
-#generate session
 def gen_session():
+    """generate session"""
     message   = bytes(ip, 'utf-8')
     secret    = bytes(secrets.SECRET, 'utf-8')
     signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
     return signature.decode('utf-8')
 
-#record vote
 def record_upvote(cat, cmd):
+    """record vote"""
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
         data      = fin.readlines()
         votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
@@ -202,8 +219,8 @@ def record_upvote(cat, cmd):
         else:
             return 'already upvoted'
 
-#get request answer
 def get_answer(cat, cmd=None):
+    """get request answer"""
     #get a list of all dirs/categories from data dir
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
@@ -245,8 +262,8 @@ def get_answer(cat, cmd=None):
     #category not found
     return suggest_cat(cat, dirs)
 
-#read file + write cache
 def read_file(cat, cmd):
+    """read file + write cache"""
     fp       = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
     contents = fp.read()
     c2       = ''
@@ -257,20 +274,19 @@ def read_file(cat, cmd):
     cache_write(cat + '/' + cmd, c2)
     return c2
 
-#offer category suggestions
 def suggest_cat(cat, dirs):
+    """offer category suggestions"""
     cats = ', '.join(dirs)
     return cat + ' not found\n' + 'suggestions: ' + cats
 
-#offer name suggestions for category
-#not presently in use
 def suggest_cmd(cat, cmd, suggestions):
+    """offer name suggestions for category"""
+    """not presently in use"""
     cmds = ', '.join(suggestions)
     return cmd + ' not found in ' + cat + '\n' + 'suggestions: ' + cmds
 
-#color formatting
 def col(text, color=None):
-    """asdasd"""
+    """apply color formatting"""
     c = {
         #background
         'b_black'       : '40',
@@ -323,42 +339,44 @@ def col(text, color=None):
     }
     return '\033[' + c[color] + 'm' + text + '\033[0m'
 
-#colorize results
 def colorize(text):
+    """colorize results"""
     if re.match(r'^#', text):
         t = col(text, 'f_dark_gray')
     else:
         t = col(text, 'f_white')
     return t
 
-#cache - get value
 def cache_read(key):
+    """cache - get value"""
     v = redis.get(key)
     if v is not None:
         return v.decode('utf-8')
     else:
         return None
 
-#cache - set value
 def cache_write(key, val):
+    """cache - set value"""
     redis.set(key, val)
 
 def cache_write_exp(key, val, ex):
+    """cache - set value with expiration"""
     redis.set(key, val, ex)
 
 def cache_delete(key):
+    """cache - delete key"""
     redis.delete(key)
 
-#cache - flush the entire cache db
 def cache_clear():
+    """cache - flush the entire cache db"""
     redis.flushdb()
 
-#calculate request time
 def time_elapsed(start_time):
+    """calculate request time"""
     return "%02.8f" % (time.time() - start_time)
 
-#print banner
 def banner(ip=None, start_time=None):
+    """print banner"""
     info = col(col(ip, 'c_dark_blue'), 'bold') \
         + col(' in ', 'f_white') \
         + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
@@ -375,6 +393,6 @@ def banner(ip=None, start_time=None):
 """
     return banner
 
-#ain't nothin' to it but to do it
 if __name__ == '__main__':
+    """ain't nothin' to it but to do it"""
     api.run()
