@@ -96,6 +96,7 @@ def process_post_request(cat, cmd, oneliner, userid):
     h_oneliner = header + oneliner
     print(h_oneliner)
     if save_oneliner(cat, cmd, h_oneliner):
+        os.system('bin/collaborator.sh ' + userid)
         return True
     else:
         return False
