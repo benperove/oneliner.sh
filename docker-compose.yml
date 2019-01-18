@@ -17,6 +17,7 @@ services:
     container_name: oneliner
     environment:
       REDIS_HOST: 'redis'
+      GITHUB_ACCESS_TOKEN: ${GITHUB_ACCESS_TOKEN}
     ports:
       - '8080'
     networks:
