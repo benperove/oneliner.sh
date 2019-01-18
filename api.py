@@ -62,7 +62,6 @@ async def test2(req, resp, *, cat, cmd):
 @api.route("/{cat}/{cmd}/upvote")
 async def vote(req, resp, *, cat, cmd):
     """process votes for category + command"""
-
     @api.background.task
     def vote(cat, cmd):
         upvotes = record_upvote(cat, cmd)
@@ -107,10 +106,9 @@ def process_post_request(cat, cmd, oneliner, userid):
 # usage: as is
 # variables: 
 # contributor: """ + userid + """
-# """ + ('-' * 30) + '\n'
-    h_oneliner = header + oneliner
-    print(h_oneliner)
-    if save_oneliner(cat, cmd, h_oneliner):
+# """ + ('-'*30) + '\n'
+    oneliner = header + oneliner
+    if save_oneliner(cat, cmd, oneliner):
         os.system('bin/collaborator.sh ' + userid)
         return True
     else:
@@ -118,7 +116,7 @@ def process_post_request(cat, cmd, oneliner, userid):
 
 def save_oneliner(cat, cmd, oneliner):
     """write the command to a temp file"""
-    nonce = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
+    nonce    = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
     fn       = cat + '/' + cmd
     filename = fn.replace('/', '.') + '.' + nonce
     filename = os.path.join(config.SUBMISSION_PATH, filename)
@@ -132,30 +130,32 @@ async def github_login(req, resp):
     """github login"""
     global client
     global access_token
-    client = Client(secrets.KEY, secrets.SECRET,
-                site=config.SITE,
-                authorize_url=config.AUTHORIZE_URL,
-                token_url=config.TOKEN_URL)
+    client = Client(secrets.KEY,
+                    secrets.SECRET,
+                    site=config.SITE,
+                    authorize_url=config.AUTHORIZE_URL,
+                    token_url=config.TOKEN_URL)
     authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope=config.SCOPE)
-    r = 'Go to the following link in your browser:\n\n'
-    r +=  authorize_url + '\n\n'
-    resp.text = banner(ip, time.time()) + r
+    response = 'Go to the following link in your browser:\n\n'
+    response +=  authorize_url + '\n\n'
+    resp.text = banner(ip, time.time()) + response
 
 @api.route("/oauth2")
 async def github_callback(req, resp):
     """github oauth2 callback"""
     code   = req.params['code']
     code   = code.strip()
-    client = Client(secrets.KEY, secrets.SECRET,
-            site=config.SITE,
-            authorize_url=config.AUTHORIZE_URL,
-            token_url=config.TOKEN_URL)
+    client = Client(secrets.KEY,
+                    secrets.SECRET,
+                    site=config.SITE,
+                    authorize_url=config.AUTHORIZE_URL,
+                    token_url=config.TOKEN_URL)
     access_token = client.auth_code.get_token(code, redirect_uri=config.CALLBACK, parse='query')
-    ret          = access_token.get('/user')
+    data         = access_token.get('/user')
     session_id   = gen_session()
     cache_write('sessions:' + session_id, access_token.headers['Authorization'])
     cookie       = '<br>run this to save a cookie & verify your login:<br><textarea style="margin: 0px; width: 569px; height: 90px;">echo "oneliner.sh FALSE / FALSE 0 session ' + session_id + '" | sed -e "s/\\s/\\t/g" > ~/.oneliner.sh.cookie.txt && curl -L -b ~/.oneliner.sh.cookie.txt oneliner.sh/me</textarea><br>'
-    resp.text    = '<html>Welcome, ' + ret.parsed['login'] + '!<br><br>' + cookie + '</html>'
+    resp.text    = '<html>Welcome, ' + data.parsed['login'] + '!<br><br>' + cookie + '</html>'
 
 
 @api.route("/me")
@@ -163,9 +163,9 @@ async def me(req, resp):
     """check login"""
     cookie    = req.headers['cookie'].split('session=').pop(1)
     token     = cache_read('sessions:' + cookie).split(' ')[1]
-    g         = Github(token)
-    resp.text = g.get_user().name + ' is authenticated'
-    return g.get_user()
+    gc        = Github(token)
+    resp.text = gc.get_user().name + ' is authenticated'
+    return gc.get_user()
 
 def is_loggedin(req):
     """determine if logged in"""
@@ -175,8 +175,8 @@ def is_loggedin(req):
             if cache_read('sessions:' + cookie) is not None:
                 token = cache_read('sessions:' + cookie).split(' ')[1]
                 if token is not None:
-                    g = Github(token)
-                    if g:
+                    gc = Github(token)
+                    if gc:
                         print('is_loggedin(): true')
                         return True
                     else:
@@ -204,18 +204,18 @@ def gen_session():
 
 def record_upvote(cat, cmd):
     """record vote"""
-    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
-        data      = fin.readlines()
+    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as filename:
+        data      = filename.readlines()
         votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
-        v         = int(votes) + 1
-        data[0]   = '# ▲' + str(v) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
+        votes     = int(votes) + 1
+        data[0]   = '# ▲' + str(votes) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
         has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + cmd)
         if has_voted is None:
             cache_write_exp('upvotes:' + ip + ':/' + cat + '/' + cmd, time.time(), ex=86400)
-            with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'w') as fin2:
-                fin2.writelines(data)
+            with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'w') as filename2:
+                filename2.writelines(data)
                 cache_delete(cat + '/' + cmd)
-            return v
+            return votes
         else:
             return 'already upvoted'
 
@@ -225,9 +225,10 @@ def get_answer(cat, cmd=None):
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
     if cat in dirs:
-        r1 = 'cat ' + cat + ' is in list\n'
-        f1 = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
-        if cmd in f1:
+        #r1 = 'cat ' + cat + ' is in list\n'
+        dir_list = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
+        print(dir_list)
+        if cmd in dir_list:
             f2 = 'cmd ' + cmd + ' is in cat ' + cat
             f3 = cache_read(cat + '/' + cmd)
             #if cache miss
@@ -245,7 +246,7 @@ def get_answer(cat, cmd=None):
             #first create a list sorted by upvotes
             ar  = ''
             lst = []
-            for s in f1:
+            for s in dir_list:
                 fc      = read_file(cat, s)
                 line1   = fc.split('\n')[0].split(' ')
                 upvotes = line1[1][1:]
