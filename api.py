@@ -225,55 +225,53 @@ def get_answer(cat, cmd=None):
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
     if cat in dirs:
-        #r1 = 'cat ' + cat + ' is in list\n'
-        dir_list = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
-        print(dir_list)
-        if cmd in dir_list:
-            f2 = 'cmd ' + cmd + ' is in cat ' + cat
-            f3 = cache_read(cat + '/' + cmd)
+        cmd_list = [f for f in listdir(config.DATA_DIR + '/' + cat) if isfile(join(config.DATA_DIR + '/' + cat, f))]
+        if cmd in cmd_list:
+            cache = cache_read(cat + '/' + cmd)
             #if cache miss
-            if f3 == None:
+            if cache == None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
                 return read_file(cat, cmd) + '\n'
             else:
                 #cache hit
                 print('DEBUG: cache hit') if config.DEBUG else 0
-                return f3 + '\n'
+                return cache + '\n'
         else:
             #command not found in category
             #instead of returning command suggestions, return everything
             #first create a list sorted by upvotes
-            ar  = ''
-            lst = []
-            for s in dir_list:
-                fc      = read_file(cat, s)
-                line1   = fc.split('\n')[0].split(' ')
-                upvotes = line1[1][1:]
-                slug    = line1[2].split('/')[2]
-                lst     += [[slug, upvotes]]
-            nl = sorted(lst, key=lambda k: k[1], reverse=True)
-            #build the return string in the correct order
-            for n in nl:
-                if cache_read(cat + '/' + n[0]) is not None:
-                    ar += cache_read(cat + '/' + n[0]) + '\n'
+            result   = ''
+            tmp_list = []
+            for cmd in cmd_list:
+                contents = read_file(cat, cmd)
+                #parse first header line
+                line1    = contents.split('\n')[0].split(' ')
+                upvotes  = line1[1][1:]
+                vote_url = line1[2].split('/')[2]
+                tmp_list += [[vote_url, upvotes]]
+            sorted_list = sorted(tmp_list, key=lambda k: k[1], reverse=True)
+            #build the result string sorted by upvotes descending
+            for cmd in sorted_list:
+                if cache_read(cat + '/' + cmd[0]) is not None:
+                    result += cache_read(cat + '/' + cmd[0]) + '\n'
                 else:
-                    ar += read_file(cat, n[0]) + '\n'
-            return ar
+                    result += read_file(cat, cmd[0]) + '\n'
+            return result
     #category not found
     return suggest_cat(cat, dirs)
 
 def read_file(cat, cmd):
     """read file + write cache"""
-    fp       = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
-    contents = fp.read()
-    c2       = ''
-    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as fin:
-        for line in fin:
-            c2 += colorize(line)
+    filename = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
+    contents = filename.read()
+    result   = ''
+    with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as file:
+        for line in file:
+            result += colorize(line)
     #write to cache
-    cache_write(cat + '/' + cmd, c2)
-    return c2
+    cache_write(cat + '/' + cmd, result)
+    return result
 
 def suggest_cat(cat, dirs):
     """offer category suggestions"""
@@ -288,7 +286,7 @@ def suggest_cmd(cat, cmd, suggestions):
 
 def col(text, color=None):
     """apply color formatting"""
-    c = {
+    color_dict = {
         #background
         'b_black'       : '40',
         'b_blue'        : '44',
@@ -338,21 +336,21 @@ def col(text, color=None):
         'rst'           : 'reset',
         'u'             : 'underline'
     }
-    return '\033[' + c[color] + 'm' + text + '\033[0m'
+    return '\033[' + color_dict[color] + 'm' + text + '\033[0m'
 
 def colorize(text):
     """colorize results"""
     if re.match(r'^#', text):
-        t = col(text, 'f_dark_gray')
+        colorized = col(text, 'f_dark_gray')
     else:
-        t = col(text, 'f_white')
-    return t
+        colorized = col(text, 'f_white')
+    return colorized
 
 def cache_read(key):
     """cache - get value"""
-    v = redis.get(key)
-    if v is not None:
-        return v.decode('utf-8')
+    val = redis.get(key)
+    if val is not None:
+        return val.decode('utf-8')
     else:
         return None
 
@@ -378,11 +376,11 @@ def time_elapsed(start_time):
 
 def banner(ip=None, start_time=None):
     """print banner"""
-    info = col(col(ip, 'c_dark_blue'), 'bold') \
-        + col(' in ', 'f_white') \
-        + col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') \
-        + col(' seconds ', 'f_white') \
-        + col(col('v' + version, 'c_light_green'), 'bold')
+    info = col(col(ip, 'c_dark_blue'), 'bold') + \
+            col(' in ', 'f_white') + \
+            col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') + \
+            col(' seconds ', 'f_white') + \
+            col(col('v' + version, 'c_light_green'), 'bold')
     banner = r"""                   _                       _     
                   | ( )                   | |    
    ___  _ __   ___| |_ _ __   ___ _ __ ___| |__  
