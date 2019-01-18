@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""oneliner.sh"""
+'''
+oneliner.sh: be a cli samurai
+'''
 import os
 import re
 import time
@@ -17,7 +19,7 @@ from os.path import isdir, isfile, join
 from pyoauth2 import Client
 from github import Github
 
-version = '0.9.4'
+version = '0.9.5'
 api     = responder.API()
 redis   = redis.StrictRedis(
             host=config.REDIS_HOST,
@@ -26,8 +28,8 @@ redis   = redis.StrictRedis(
 
 @api.route(before_request=True)
 def prepare_headers(req, resp):
-    """set client ip address and"""
-    """specify headers for all requests"""
+    '''set client ip address and'''
+    '''specify headers for all requests'''
     global ip
     ip = req._starlette.client.host #standalone
     ip = req.headers['x-real-ip'] #nginx proxy
@@ -35,7 +37,7 @@ def prepare_headers(req, resp):
 
 @api.route("/")
 async def main(req, resp):
-    """requests for the main page"""
+    '''requests for the main page'''
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
@@ -46,22 +48,22 @@ async def main(req, resp):
 
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
-    """requests for a category"""
+    '''requests for a category'''
     resp.text = banner(ip, time.time()) + get_answer(cat)
 
 @api.route("/{cat}/{cmd}")
 async def cat_name(req, resp, *, cat, cmd):
-    """requests for a category + command"""
+    '''requests for a category + command'''
     resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
 
 @api.route("/{cat}/{cmd}/json")
 async def test2(req, resp, *, cat, cmd):
-    """requests for category + command with a json response"""
+    '''requests for category + command with a json response'''
     resp.media = {"category": cat, "command": cmd}
 
 @api.route("/{cat}/{cmd}/upvote")
 async def vote(req, resp, *, cat, cmd):
-    """process votes for category + command"""
+    '''process votes for category + command'''
     @api.background.task
     def vote(cat, cmd):
         upvotes = record_upvote(cat, cmd)
@@ -75,7 +77,7 @@ async def vote(req, resp, *, cat, cmd):
 
 @api.route("/{cat}/{cmd}/add")
 async def share(req, resp, *, cat, cmd):
-    """process shared oneliners"""
+    '''process shared oneliners'''
     ls = is_loggedin(req)
     if ls is True:
         #resp.text = 'is logged in'
@@ -91,7 +93,7 @@ async def share(req, resp, *, cat, cmd):
         resp.text = ls
 
 def is_cli(req):
-    """determine if plaintext client in use"""
+    '''determine if plaintext client in use'''
     if 'user-agent' in req.headers:
         cli_clients = ['curl', 'wget', 'fetch', 'httpie', 'lwp-request', 'openbsd ftp', 'python-requests']
         for client in cli_clients:
@@ -101,6 +103,7 @@ def is_cli(req):
     return False
 
 def process_post_request(cat, cmd, oneliner, userid):
+    '''process incoming command additions'''
     header = """# ▲0 oneliner.sh/""" + cat + '/' + cmd + '/upvote'"""
 # purpose:
 # usage: as is
@@ -115,10 +118,10 @@ def process_post_request(cat, cmd, oneliner, userid):
         return False
 
 def save_oneliner(cat, cmd, oneliner):
-    """write the command to a temp file"""
+    '''write the command to a temp file'''
     nonce    = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
-    fn       = cat + '/' + cmd
-    filename = fn.replace('/', '.') + '.' + nonce
+    cmd_path = cat + '/' + cmd
+    filename = cmd_path.replace('/', '.') + '.' + nonce
     filename = os.path.join(config.SUBMISSION_PATH, filename)
     if open(filename, 'w').write(oneliner):
         return True
@@ -127,7 +130,7 @@ def save_oneliner(cat, cmd, oneliner):
     
 @api.route("/login")
 async def github_login(req, resp):
-    """github login"""
+    '''github login'''
     global client
     global access_token
     client = Client(secrets.KEY,
@@ -142,7 +145,7 @@ async def github_login(req, resp):
 
 @api.route("/oauth2")
 async def github_callback(req, resp):
-    """github oauth2 callback"""
+    '''github oauth2 callback'''
     code   = req.params['code']
     code   = code.strip()
     client = Client(secrets.KEY,
@@ -160,7 +163,7 @@ async def github_callback(req, resp):
 
 @api.route("/me")
 async def me(req, resp):
-    """check login"""
+    '''check login'''
     cookie    = req.headers['cookie'].split('session=').pop(1)
     token     = cache_read('sessions:' + cookie).split(' ')[1]
     gc        = Github(token)
@@ -168,7 +171,7 @@ async def me(req, resp):
     return gc.get_user()
 
 def is_loggedin(req):
-    """determine if logged in"""
+    '''determine if logged in'''
     if 'cookie' in req.headers:
         cookie = req.headers['cookie'].split('session=').pop(1)
         if cookie is not None:
@@ -196,14 +199,14 @@ def is_loggedin(req):
         return 'no cookie sent'
 
 def gen_session():
-    """generate session"""
+    '''generate session'''
     message   = bytes(ip, 'utf-8')
     secret    = bytes(secrets.SECRET, 'utf-8')
     signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
     return signature.decode('utf-8')
 
 def record_upvote(cat, cmd):
-    """record vote"""
+    '''record vote'''
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as filename:
         data      = filename.readlines()
         votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
@@ -220,7 +223,7 @@ def record_upvote(cat, cmd):
             return 'already upvoted'
 
 def get_answer(cat, cmd=None):
-    """get request answer"""
+    '''get request answer'''
     #get a list of all dirs/categories from data dir
     dirs = [d for d in listdir(config.DATA_DIR) if isdir(join(config.DATA_DIR, d))]
     #if category exists
@@ -262,7 +265,7 @@ def get_answer(cat, cmd=None):
     return suggest_cat(cat, dirs)
 
 def read_file(cat, cmd):
-    """read file + write cache"""
+    '''read file + write cache'''
     filename = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
     contents = filename.read()
     result   = ''
@@ -274,18 +277,18 @@ def read_file(cat, cmd):
     return result
 
 def suggest_cat(cat, dirs):
-    """offer category suggestions"""
+    '''offer category suggestions'''
     cats = ', '.join(dirs)
     return cat + ' not found\n' + 'suggestions: ' + cats
 
 def suggest_cmd(cat, cmd, suggestions):
-    """offer name suggestions for category"""
-    """not presently in use"""
+    '''offer name suggestions for category'''
+    '''not presently in use'''
     cmds = ', '.join(suggestions)
     return cmd + ' not found in ' + cat + '\n' + 'suggestions: ' + cmds
 
 def col(text, color=None):
-    """apply color formatting"""
+    '''apply color formatting'''
     color_dict = {
         #background
         'b_black'       : '40',
@@ -339,7 +342,7 @@ def col(text, color=None):
     return '\033[' + color_dict[color] + 'm' + text + '\033[0m'
 
 def colorize(text):
-    """colorize results"""
+    '''colorize results'''
     if re.match(r'^#', text):
         colorized = col(text, 'f_dark_gray')
     else:
@@ -347,7 +350,7 @@ def colorize(text):
     return colorized
 
 def cache_read(key):
-    """cache - get value"""
+    '''cache - get value'''
     val = redis.get(key)
     if val is not None:
         return val.decode('utf-8')
@@ -355,27 +358,27 @@ def cache_read(key):
         return None
 
 def cache_write(key, val):
-    """cache - set value"""
+    '''cache - set value'''
     redis.set(key, val)
 
 def cache_write_exp(key, val, ex):
-    """cache - set value with expiration"""
+    '''cache - set value with expiration'''
     redis.set(key, val, ex)
 
 def cache_delete(key):
-    """cache - delete key"""
+    '''cache - delete key'''
     redis.delete(key)
 
 def cache_clear():
-    """cache - flush the entire cache db"""
+    '''cache - flush the entire cache db'''
     redis.flushdb()
 
 def time_elapsed(start_time):
-    """calculate request time"""
+    '''calculate request time'''
     return "%02.8f" % (time.time() - start_time)
 
 def banner(ip=None, start_time=None):
-    """print banner"""
+    '''print banner'''
     info = col(col(ip, 'c_dark_blue'), 'bold') + \
             col(' in ', 'f_white') + \
             col(col(str(time_elapsed(start_time)), 'c_light_blue'), 'bold') + \
@@ -393,5 +396,5 @@ def banner(ip=None, start_time=None):
     return banner
 
 if __name__ == '__main__':
-    """ain't nothin' to it but to do it"""
+    '''ain't nothin' to it but to do it'''
     api.run()
