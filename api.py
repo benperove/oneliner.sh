@@ -33,7 +33,6 @@ def prepare_headers(req, resp):
     global ip
     ip = req._starlette.client.host #standalone
     ip = req.headers['x-real-ip'] #nginx proxy
-    resp.headers['x-pizza'] = 'delicious' #always
 
 @api.route("/")
 async def main(req, resp):
