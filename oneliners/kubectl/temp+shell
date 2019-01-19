@@ -1,4 +1,4 @@
-# ▲4 oneliner.sh/kubectl/temp+shell/upvote
+# ▲5 oneliner.sh/kubectl/temp+shell/upvote
 # purpose: throwaway shell that self-destructs upon exit
 # usage: as is
 kubectl run my-tmp-shell --rm -i --tty --image ubuntu:latest -- bash
