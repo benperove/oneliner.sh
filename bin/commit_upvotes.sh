@@ -1,5 +1,5 @@
 #!/bin/sh
-git fetch --all
+git pull --no-edit
 git checkout -b upvotes
 git add oneliners/ && \
 git commit -m 'upvotes counted' && \
