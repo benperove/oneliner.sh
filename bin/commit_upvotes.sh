@@ -2,4 +2,4 @@
 git checkout -b upvotes
 git add oneliners/ && \
 git commit -m 'upvotes counted' && \
-git push
+git push --set-upstream origin upvotes
