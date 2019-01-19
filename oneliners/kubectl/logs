@@ -1,4 +1,4 @@
-# ▲0 oneliner.sh/kubectl/logs/upvote
+# ▲3 oneliner.sh/kubectl/logs/upvote
 # purpose: gets container logs
 # usage: set first three variables as:
 # ns=<namespace>, app=<app name>, container=<container name>
