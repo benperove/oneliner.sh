@@ -56,11 +56,6 @@ async def cat_name(req, resp, *, cat, cmd):
     '''requests for a category + command'''
     resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
 
-@api.route("/{cat}/{cmd}/json")
-async def test2(req, resp, *, cat, cmd):
-    '''requests for category + command with a json response'''
-    resp.media = {"category": cat, "command": cmd}
-
 @api.route("/{cat}/{cmd}/upvote")
 async def vote(req, resp, *, cat, cmd):
     '''process votes for category + command'''
@@ -80,7 +75,6 @@ async def share(req, resp, *, cat, cmd):
     '''process shared oneliners'''
     ls = is_loggedin(req)
     if ls is True:
-        #resp.text = 'is logged in'
         user     = await me(req, resp)
         userid   = user.login
         oneliner = await req._starlette.body()
