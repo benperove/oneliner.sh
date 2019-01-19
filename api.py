@@ -104,12 +104,12 @@ def is_cli(req):
 
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
-    header = """# ▲0 oneliner.sh/""" + cat + '/' + cmd + '/upvote'"""
+    header = '''# ▲0 oneliner.sh/''' + cat + '/' + cmd + '/upvote''''
 # purpose:
 # usage: as is
 # variables: 
-# contributor: """ + userid + """
-# """ + ('-'*30) + '\n'
+# contributor: ''' + userid + '''
+# ''' + ('-'*30) + '\n'
     oneliner = header + oneliner
     if save_oneliner(cat, cmd, oneliner):
         os.system('bin/collaborator.sh ' + userid)
