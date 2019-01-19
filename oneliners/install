@@ -1,4 +1,0 @@
-# ▲0 oneliner.sh/certbot/install
-# purpose: download certbot-auto
-# usage: install letsencrypt certificates
-wget https://dl.eff.org/certbot-auto && chmod a+x /certbot-auto && ./certbot-auto --help

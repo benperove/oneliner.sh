@@ -1,4 +1,4 @@
-# ▲0 oneliner.sh/certbot-auto/install/upvote
+# ▲0 oneliner.sh/certbot/install/upvote
 # purpose: install certbot-auto
 # usage: as is
 wget https://dl.eff.org/certbot-auto && chmod a+x certbot-auto && ./certbot-auto --help
