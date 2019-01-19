@@ -139,9 +139,9 @@ async def github_login(req, resp):
                     authorize_url=config.AUTHORIZE_URL,
                     token_url=config.TOKEN_URL)
     authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope=config.SCOPE)
-    response = 'Go to the following link in your browser:\n\n'
-    response +=  authorize_url + '\n\n'
-    resp.text = banner(ip, time.time()) + response
+    response      = 'Go to the following link in your browser:\n\n'
+    response      += authorize_url + '\n\n'
+    resp.text     = banner(ip, time.time()) + response
 
 @api.route("/oauth2")
 async def github_callback(req, resp):
@@ -208,12 +208,12 @@ def gen_session():
 def record_upvote(cat, cmd):
     '''record vote'''
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as filename:
-        data      = filename.readlines()
-        votes     = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
-        votes     = int(votes) + 1
-        data[0]   = '# ▲' + str(votes) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
-        has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + cmd)
-        if has_voted is None:
+        data         = filename.readlines()
+        votes        = data[0].split(' ')[1][1:] #strip the arrow symbol from col 2
+        votes        = int(votes) + 1
+        data[0]      = '# ▲' + str(votes) + ' oneliner.sh/' + cat + '/' + cmd + '/upvote\n'
+        ip_has_voted = cache_read('upvotes:' + ip + ':/' + cat + '/' + cmd)
+        if ip_has_voted is None:
             cache_write_exp('upvotes:' + ip + ':/' + cat + '/' + cmd, time.time(), ex=86400)
             with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'w') as filename2:
                 filename2.writelines(data)
