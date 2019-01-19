@@ -65,15 +65,15 @@ async def test2(req, resp, *, cat, cmd):
 async def vote(req, resp, *, cat, cmd):
     '''process votes for category + command'''
     @api.background.task
-    def vote(cat, cmd):
-        upvotes = record_upvote(cat, cmd)
-        if type(upvotes) == int:
-            resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
-        else:
-            resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
+    def commit_votes(cat, cmd):
+        os.system('bin/commit_upvotes.sh')
 
-    vote(cat, cmd)
-    resp.content = 'processing upvote...'
+    upvotes = record_upvote(cat, cmd)
+    if type(upvotes) == int:
+        commit_votes(cat, cmd)
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
+    else:
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
 
 @api.route("/{cat}/{cmd}/add")
 async def share(req, resp, *, cat, cmd):
