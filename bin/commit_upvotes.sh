@@ -1,2 +1,5 @@
 #!/bin/sh
-git add oneliners/ && git commit -m 'upvotes counted' && git push
+git checkout -b upvotes
+git add oneliners/ && \
+git commit -m 'upvotes counted' && \
+git push
