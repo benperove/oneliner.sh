@@ -313,6 +313,7 @@ def col(text, color=None):
         'f_white'       : '1;37',
         'f_yellow'      : '1;33',
         #custom foreground
+        'c_dark_gray'   : '38;5;245',
         'c_dark_blue'   : '38;5;27',
         'c_light_blue'  : '38;5;39',
         'c_light_green' : '38;5;82',
@@ -337,7 +338,7 @@ def col(text, color=None):
 def colorize(text):
     '''colorize results'''
     if re.match(r'^#', text):
-        colorized = col(text, 'f_dark_gray')
+        colorized = col(text, 'c_dark_gray')
     else:
         colorized = col(text, 'f_white')
     return colorized
