@@ -1,0 +1,5 @@
+# ▲0 oneliner.sh/linux/find+files+sorted+by+modified+time/upvote
+# purpose: find all files sorted by modified time
+# usage: as is
+# ------------------------------
+find ./ -type f -exec stat --format '%Z :%y %n' {} \; | sort -n | cut -d: -f2- | less
