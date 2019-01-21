@@ -10,6 +10,7 @@ responder = "*"
 redis = "*"
 py-oauth2 = "*"
 pygithub = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.7"
