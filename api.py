@@ -2,7 +2,6 @@
 '''
 oneliner.sh: be a cli samurai
 '''
-import os
 import re
 import time
 import hmac
@@ -12,9 +11,10 @@ import random
 import string
 import responder
 import redis
+import yaml
 import config
 import secrets
-from os import listdir
+from os import listdir, system
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
 from github import Github
@@ -31,14 +31,14 @@ def prepare_headers(req, resp):
     '''set client ip address and'''
     '''specify headers for all requests'''
     global ip
-    #ip = req._starlette.client.host #standalone
-    ip = req.headers['x-real-ip'] #nginx proxy
+    ip = req._starlette.client.host #standalone
+    #ip = req.headers['x-real-ip'] #nginx proxy
 
 @api.route("/")
 async def main(req, resp):
     '''requests for the main page'''
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
-    elem = {'title': 'the title', 'result': '123'}
+    #elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
         resp.text = banner(ip, time.time()) + 'coming soon'
     else:
@@ -60,7 +60,7 @@ async def vote(req, resp, *, cat, cmd):
     '''process votes for category + command'''
     @api.background.task
     def commit_votes(cat, cmd):
-        os.system('bin/commit_upvotes.sh')
+        system('bin/commit_upvotes.sh')
 
     upvotes = record_upvote(cat, cmd)
     if type(upvotes) == int:
@@ -105,7 +105,7 @@ def process_post_request(cat, cmd, oneliner, userid):
 # ''' + ('-'*30) + '\n'
     oneliner = header + oneliner
     if save_oneliner(cat, cmd, oneliner):
-        os.system('bin/collaborator.sh ' + userid)
+        system('bin/collaborator.sh ' + userid)
         return True
     else:
         return False
@@ -225,7 +225,7 @@ def get_answer(cat, cmd=None):
         if cmd in cmd_list:
             cache = cache_read(cat + '/' + cmd)
             #if cache miss
-            if cache == None:
+            if cache is None:
                 #get file + write cache + return contents
                 print('DEBUG: cache miss') if config.DEBUG else 0
                 return read_file(cat, cmd) + '\n'
@@ -259,8 +259,6 @@ def get_answer(cat, cmd=None):
 
 def read_file(cat, cmd):
     '''read file + write cache'''
-    filename = open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r')
-    contents = filename.read()
     result   = ''
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as file:
         for line in file:
