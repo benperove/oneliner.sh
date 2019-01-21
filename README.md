@@ -18,6 +18,8 @@ for example, let's say you wanted to add a command for finding and replacing a s
 
 you could type:
 
-```cat << EOF | curl -b ~/.oneliner.sh.cookie.txt --data-binary @- oneliner.sh/linux/find+files+search+replace/add
+```
+cat << EOF | curl -b ~/.oneliner.sh.cookie.txt --data-binary @- oneliner.sh/linux/find+files+search+replace/add
 find ./ -type f -print0 | xargs -0 sed -i 's/1.2.3.4/1.2.3.5/g'
-EOF```
+EOF
+```
