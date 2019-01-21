@@ -318,6 +318,8 @@ def col(text, color=None):
         'c_dark_blue'   : '38;5;27',
         'c_light_blue'  : '38;5;39',
         'c_light_green' : '38;5;82',
+        #custom background
+        'cb_dark_gray'  : '48;5;237',
         #special
         'blink'         : '5',
         'bold'          : '1',
@@ -340,6 +342,9 @@ def colorize(text):
     '''colorize results'''
     if re.match(r'^#', text):
         colorized = col(text, 'c_dark_gray')
+        if re.match(r'^# ▲', text):
+            line      = text.split(' ')
+            colorized = col(line[0], 'c_dark_gray') + col(line[1], 'cb_dark_gray') + col(line[2], 'c_dark_gray')
         if re.match(r'^# purpose:', text):
             line      = text.split(':')
             colorized = col(line[0] + ':', 'c_dark_gray') + col(line[1], 'c_dark_gray_h')
