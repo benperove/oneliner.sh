@@ -319,7 +319,7 @@ def col(text, color=None):
         'c_light_blue'  : '38;5;39',
         'c_light_green' : '38;5;82',
         #custom background
-        'cb_dark_gray'  : '48;5;237',
+        'cb_dark_gray'  : '48;5;233',
         #special
         'blink'         : '5',
         'bold'          : '1',
