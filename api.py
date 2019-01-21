@@ -341,7 +341,8 @@ def colorize(text):
     if re.match(r'^#', text):
         colorized = col(text, 'c_dark_gray')
         if re.match(r'^# purpose:', text):
-            colorized = col(text, 'c_dark_gray_h')
+            line      = text.split(':')
+            colorized = col(line[0], 'c_dark_gray') + col(line[1], 'c_dark_gray_h')
     else:
         colorized = col(text, 'f_white')
     return colorized
