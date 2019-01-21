@@ -314,7 +314,7 @@ def col(text, color=None):
         'f_yellow'      : '1;33',
         #custom foreground
         'c_dark_gray'   : '38;5;242',
-        'c_dark_gray_h' : '38;5;245',
+        'c_dark_gray_h' : '38;5;246',
         'c_dark_blue'   : '38;5;27',
         'c_light_blue'  : '38;5;39',
         'c_light_green' : '38;5;82',
@@ -342,7 +342,7 @@ def colorize(text):
         colorized = col(text, 'c_dark_gray')
         if re.match(r'^# purpose:', text):
             line      = text.split(':')
-            colorized = col(line[0], 'c_dark_gray') + col(line[1], 'c_dark_gray_h')
+            colorized = col(line[0] + ':', 'c_dark_gray') + col(line[1], 'c_dark_gray_h')
     else:
         colorized = col(text, 'f_white')
     return colorized
