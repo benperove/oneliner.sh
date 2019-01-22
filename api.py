@@ -78,6 +78,8 @@ async def share(req, resp, *, cat, cmd):
         userid   = user.login
         oneliner = await req._starlette.body()
         oneliner = oneliner.decode('utf-8')
+        oneliner = r'' + oneliner + ''
+        print(oneliner)
         if process_post_request(cat, cmd, oneliner, userid):
             resp.text = cat + '/' + cmd + ' added to the queue by ' + userid
         else:
@@ -98,8 +100,6 @@ def is_cli(req):
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
     print(oneliner)
-    oneliner = oneliner.lstrip("'")
-    oneliner = oneliner.rstrip("\n'")
     oneliner = {
         'author': userid,
         'upvotes': 0,
