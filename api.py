@@ -106,7 +106,7 @@ def process_post_request(cat, cmd, oneliner, userid):
         'variables': 'TBD',
         'command': oneliner
     }
-    oneliner_yaml = yaml.dump(oneliner, default_flow_style=False)
+    oneliner_yaml = yaml.dump(oneliner, default_style=None, default_flow_style=False)
     if save_oneliner(cat, cmd, oneliner_yaml):
         system('bin/collaborator.sh ' + userid)
         return True
