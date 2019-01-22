@@ -113,9 +113,9 @@ def process_post_request(cat, cmd, oneliner, userid):
     else:
         return False
 
-@api.route("/tmpcmp")
+@api.route("/tmpcmd")
 def get_tmp_cmd(req, resp):
-    with open('/incoming/linux.find+files+search+replace.IORXRDDIZ') as stream:
+    with open('incoming/linux.find+files+search+replace.IORXRDDIZ') as stream:
         y = yaml.load(stream)
         print(y)
         print(y['command'])
