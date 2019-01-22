@@ -97,10 +97,11 @@ def is_cli(req):
 
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
+    print(oneliner)
     oneliner = {
         'author': userid,
         'upvotes': 0,
-        'url': cat + '/' + cmd + '/upvote',
+        'url': 'oneliner.sh/' + cat + '/' + cmd + '/upvote',
         'purpose': 'TBD',
         'usage': 'TBD',
         'variables': 'TBD',
