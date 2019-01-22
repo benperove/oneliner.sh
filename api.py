@@ -77,7 +77,7 @@ async def share(req, resp, *, cat, cmd):
         user     = await me(req, resp)
         userid   = user.login
         oneliner = await req._starlette.body()
-        oneliner = oneliner.decode('utf-8')
+        oneliner = oneliner.decode('utf-8').rstrip('\n')
         if process_post_request(cat, cmd, oneliner, userid):
             resp.text = cat + '/' + cmd + ' added to the queue by ' + userid
         else:
@@ -112,6 +112,13 @@ def process_post_request(cat, cmd, oneliner, userid):
         return True
     else:
         return False
+
+@api.route("/tmpcmp")
+def get_tmp_cmd(req, resp):
+    with open('/incoming/linux.find+files+search+replace.IORXRDDIZ') as stream:
+        y = yaml.load(stream)
+        print(y)
+        print(y['command'])
 
 def save_oneliner(cat, cmd, oneliner):
     '''write the command to a temp file'''
