@@ -104,7 +104,7 @@ def process_post_request(cat, cmd, oneliner, userid):
         'purpose': 'TBD',
         'usage': 'TBD',
         'variables': 'TBD',
-        'command': r"' |\n'" + oneliner + "'"
+        'command': r"'" +oneliner + "'"
     }
     oneliner_yaml = yaml.dump(oneliner, default_flow_style=False)
     if save_oneliner(cat, cmd, oneliner_yaml):
