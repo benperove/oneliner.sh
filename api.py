@@ -97,14 +97,17 @@ def is_cli(req):
 
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
-    header = '''# ▲0 oneliner.sh/''' + cat + '/' + cmd + '/upvote''''
-# purpose:
-# usage: as is
-# variables: 
-# contributor: ''' + userid + '''
-# ''' + ('-'*30) + '\n'
-    oneliner = header + oneliner
-    if save_oneliner(cat, cmd, oneliner):
+    oneliner = {
+        'author': userid,
+        'upvotes': 0,
+        'url': cat + '/' + cmd + '/upvote',
+        'purpose': 'TBD',
+        'usage': 'TBD',
+        'variables': 'TBD',
+        'command': oneliner
+    }
+    oneliner_yaml = yaml.dump(oneliner, default_flow_style=False)
+    if save_oneliner(cat, cmd, oneliner_yaml):
         system('bin/collaborator.sh ' + userid)
         return True
     else:
@@ -115,7 +118,7 @@ def save_oneliner(cat, cmd, oneliner):
     nonce    = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
     cmd_path = cat + '/' + cmd
     filename = cmd_path.replace('/', '.') + '.' + nonce
-    filename = os.path.join(config.SUBMISSION_PATH, filename)
+    filename = join(config.SUBMISSION_PATH, filename)
     if open(filename, 'w').write(oneliner):
         return True
     else:
