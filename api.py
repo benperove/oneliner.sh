@@ -98,6 +98,7 @@ def is_cli(req):
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
     print(oneliner)
+    oneliner = oneliner.lstrip("'").rstrip("'")
     oneliner = {
         'author': userid,
         'upvotes': 0,
@@ -105,7 +106,7 @@ def process_post_request(cat, cmd, oneliner, userid):
         'purpose': 'TBD',
         'usage': 'TBD',
         'variables': 'TBD',
-        'command': u' + |\n' + oneliner
+        'command': u' |\n' + oneliner
     }
     oneliner_yaml = yaml.dump(oneliner, default_flow_style=False)
     if save_oneliner(cat, cmd, oneliner_yaml):
