@@ -98,7 +98,8 @@ def is_cli(req):
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
     print(oneliner)
-    oneliner = oneliner.lstrip("'").rstrip("'")
+    oneliner = oneliner.lstrip("'")
+    oneliner = oneliner.rstrip("\n'")
     oneliner = {
         'author': userid,
         'upvotes': 0,
