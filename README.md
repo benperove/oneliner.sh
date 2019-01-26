@@ -1,6 +1,6 @@
 # oneliner.sh
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.com/benperove/oneliner.sh.svg?token=GZU4bGtHVss1DmX96oD4&branch=master)](https://travis-ci.com/benperove/oneliner.sh) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/benperove/oneliner.sh.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/benperove/oneliner.sh/context:python)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.com/benperove/oneliner.sh.svg?token=GZU4bGtHVss1DmX96oD4&branch=master)](https://travis-ci.com/benperove/oneliner.sh)
 
 1. login
 
@@ -18,8 +18,7 @@ for example, let's say you wanted to add a command for finding and replacing a s
 
 you could type:
 
-```
-cat << EOF | curl -b ~/.oneliner.sh.cookie.txt --data-binary @- oneliner.sh/linux/find+files+search+replace/add
+cat <<EOF | curl -b ~/.oneliner.sh.cookie.txt --data-binary @- oneliner.sh/linux/find+files+search+replace/add
 find ./ -type f -print0 | xargs -0 sed -i 's/1.2.3.4/1.2.3.5/g'
 EOF
-```
+linux/find+files+search+replace added to the queue by benperove
