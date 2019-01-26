@@ -77,7 +77,8 @@ async def share(req, resp, *, cat, cmd):
         user     = await me(req, resp)
         userid   = user.login
         oneliner = await req._starlette.body()
-        oneliner = oneliner.decode('utf-8').rstrip('\n')
+        oneliner = oneliner.decode('utf-8')
+        oneliner = oneliner.rstrip('\n')
         if process_post_request(cat, cmd, oneliner, userid):
             resp.text = cat + '/' + cmd + ' added to the queue by ' + userid
         else:
@@ -112,13 +113,6 @@ def process_post_request(cat, cmd, oneliner, userid):
         return True
     else:
         return False
-
-@api.route("/tmpcmd")
-def get_tmp_cmd(req, resp):
-    with open('incoming/linux.find+files+search+replace.IORXRDDIZ') as stream:
-        y = yaml.load(stream)
-        print(y)
-        print(y['command'])
 
 def save_oneliner(cat, cmd, oneliner):
     '''write the command to a temp file'''
@@ -252,9 +246,11 @@ def get_answer(cat, cmd=None):
             for cmd in cmd_list:
                 contents = read_file(cat, cmd)
                 #parse first header line
+                """
                 line1    = contents.split('\n')[0].split(' ')
                 upvotes  = line1[1][1:]
                 vote_url = line1[2].split('/')[2]
+                """
                 tmp_list += [[vote_url, upvotes]]
             sorted_list = sorted(tmp_list, key=lambda k: k[1], reverse=True)
             #build the result string sorted by upvotes descending
