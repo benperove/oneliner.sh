@@ -32,7 +32,7 @@ def prepare_headers(req, resp):
     '''specify headers for all requests'''
     global ip
     ip = req._starlette.client.host #standalone
-    #ip = req.headers['x-real-ip'] #nginx proxy
+    ip = req.headers['x-real-ip'] #nginx proxy
 
 @api.route("/")
 async def main(req, resp):
