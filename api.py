@@ -133,7 +133,7 @@ async def github_login(req, resp):
                     token_url=config.TOKEN_URL)
     authorize_url = client.auth_code.authorize_url(redirect_uri=config.CALLBACK, scope=config.SCOPE)
     response      = 'Go to the following link in your browser:\n\n'
-    response      += authorize_url + '\n\n'
+    response      += '\t' + authorize_url + '\n\n'
     resp.text     = banner(ip, time.time()) + response
 
 @api.route("/oauth2")
