@@ -8,11 +8,11 @@ oneliner.sh is a currated collection of the best oneliner commands for linux.
 * upvote your favorite commands
 * share commands from your toolbox
 
-Basic usage:
+## Basic usage
 
 curl oneliner.sh/command+name
 
-Examples
+### Examples
 
 ```
 curl oneliner.sh/kubectl
