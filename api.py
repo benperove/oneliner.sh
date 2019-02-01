@@ -19,7 +19,7 @@ from os.path import isdir, isfile, join
 from pyoauth2 import Client
 from github import Github
 
-version = '0.9.5'
+version = '0.9.6'
 api     = responder.API()
 redis   = redis.StrictRedis(
             host=config.REDIS_HOST,
@@ -115,7 +115,7 @@ def save_oneliner(cat, cmd, oneliner):
     nonce    = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
     cmd_path = cat + '/' + cmd
     filename = cmd_path.replace('/', '.') + '.' + nonce
-    filename = os.path.join(config.SUBMISSION_PATH, filename)
+    filename = join(config.SUBMISSION_PATH, filename)
     if open(filename, 'w').write(oneliner):
         return True
     else:
