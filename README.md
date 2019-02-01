@@ -1,8 +1,8 @@
-# oneliner.sh - be a CLI samurai
+# oneliner.sh
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![Build Status](https://travis-ci.com/benperove/oneliner.sh.svg?token=GZU4bGtHVss1DmX96oD4&branch=master)](https://travis-ci.com/benperove/oneliner.sh) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/benperove/oneliner.sh.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/benperove/oneliner.sh/context:python)
 
-oneliner.sh is a currated collection of the best oneliner commands for linux.
+oneliner.sh is a currated collection of the best oneliner commands for linux. Be a CLI samurai.
 
 ![Screenshot of oneliner.sh](https://github.com/benperove/oneliner.sh/blob/master/static/oneliner.sh-screenshot.png)
 
