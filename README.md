@@ -8,6 +8,20 @@ oneliner.sh is a currated collection of the best oneliner commands for linux.
 * upvote your favorite commands
 * share commands from your toolbox
 
+Basic usage:
+
+curl oneliner.sh/command+name
+
+Examples
+
+```
+curl oneliner.sh/kubectl
+```
+
+```
+curl oneliner.sh/docker-compose/install
+```
+
 1. login
 
 curl oneliner.sh/login
