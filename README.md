@@ -4,6 +4,8 @@
 
 oneliner.sh is a currated collection of the best oneliner commands for linux.
 
+![Screenshot of oneliner.sh](https://github.com/benperove/oneliner.sh/blob/master/static/oneliner.sh-screenshot.png)
+
 * 100% CLI-based + extremely fast
 * upvote your favorite commands
 * share commands from your toolbox
