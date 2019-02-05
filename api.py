@@ -37,7 +37,8 @@ def prepare_headers(req, resp):
 @api.route("/")
 async def main(req, resp):
     '''requests for the main page'''
-    page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
+    page = """<html><head><!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133896562-1"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-133896562-1');</script></head><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     #elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
         resp.text = banner(ip, time.time()) + get_answer('command')
