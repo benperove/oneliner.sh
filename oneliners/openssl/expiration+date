@@ -1,0 +1,6 @@
+# ▲0 oneliner.sh/openssl/expiration+date/upvote
+# purpose: get certificate expiration date
+# usage: set variable as
+# domain=<domain name> 
+# --------------------------------------------
+domain=oneliner.sh; echo | openssl s_client -connect $domain:443 -servername $domain 2>/dev/null | openssl x509 -noout -dates
