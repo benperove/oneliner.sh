@@ -40,7 +40,7 @@ async def main(req, resp):
     page = """<html><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     #elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
-        resp.text = banner(ip, time.time()) + get_answer('/')
+        resp.text = banner(ip, time.time()) + get_answer('command')
     else:
         #resp.content = api.template('terminal.html', data=elem)
         resp.text = page
