@@ -42,7 +42,7 @@ def prepare_headers(req, resp):
 async def main(req, resp):
     '''requests for the main page'''
     page = """<html><head><!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133896562-1"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-133896562-1');</script></head><style>body{background-color: #ABB8C3;}</style><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133896562-1"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-133896562-1');</script><script async defer src="https://buttons.github.io/buttons.js"></script><style>body{background-color: #ABB8C3;}</style></head><a class="github-button" href="https://github.com/benperove/oneliner.sh" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star benperove/oneliner.sh on GitHub">Star</a><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     #elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
         resp.text = banner(ip, time.time()) + get_answer('command')

@@ -11,6 +11,7 @@ redis = "*"
 py-oauth2 = "*"
 pygithub = "*"
 pyyaml = "*"
+ruamel-yaml = "*"
 
 [requires]
 python_version = "3.7"
