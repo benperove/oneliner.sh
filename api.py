@@ -194,18 +194,7 @@ echo $iam
     for line in cmd.splitlines():
         cmd2 += '  %s\n' % line
 
-    #no funciona
-    d = {
-        "author": "benperove",
-        "upvotes": 0,
-        "url": "oneliner.sh/linux/test/upvote",
-        "purpose": "to say who i am",
-        "usage": "as is",
-        "variables": "none",
-        "command": cmd2
-    }
-
-    yaml_str = """\
+    yaml_str = '''\
 contributor: benperove
 upvotes: 1
 url: oneliner.sh/linux/test/upvote
@@ -213,13 +202,12 @@ purpose: to say who i am
 usage: as is
 variables: none
 command: |
-""" + cmd2
+''' + cmd2
 
     #yaml.preserve_quotes = True
     data      = yaml.load(yaml_str)
-    response2 = yaml.dump(data, sys.stdout)
-    cat       = 'linux'
-    com       = 'test'
+    #cat       = 'linux'
+    #com       = 'test'
     line1     = '# ▲' + str(data['upvotes']) + ' ' + data['url'] + '\n'
     len1      = len(line1) - 3
     output    = ''
