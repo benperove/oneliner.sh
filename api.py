@@ -3,6 +3,7 @@
 oneliner.sh: be a cli samurai
 '''
 import re
+import sys
 import time
 import hmac
 import hashlib
@@ -11,9 +12,10 @@ import random
 import string
 import responder
 import redis
-import yaml
+#import yaml
 import config
 import secrets
+from ruamel.yaml import YAML
 from os import listdir, system
 from os.path import isdir, isfile, join
 from pyoauth2 import Client
@@ -25,6 +27,7 @@ redis   = redis.StrictRedis(
             host=config.REDIS_HOST,
             port=config.REDIS_PORT,
             db=config.REDIS_DB)
+yaml    = YAML()
 
 @api.route(before_request=True)
 def prepare_headers(req, resp):
@@ -32,7 +35,8 @@ def prepare_headers(req, resp):
     '''specify headers for all requests'''
     global ip
     ip = req._starlette.client.host #standalone
-    ip = req.headers['x-real-ip'] #nginx proxy
+    #ip = req.headers['x-real-ip'] #nginx proxy
+
 
 @api.route("/")
 async def main(req, resp):
@@ -46,15 +50,18 @@ async def main(req, resp):
         #resp.content = api.template('terminal.html', data=elem)
         resp.text = page
 
+
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
     '''requests for a category'''
     resp.text = banner(ip, time.time()) + get_answer(cat)
 
+
 @api.route("/{cat}/{cmd}")
 async def cat_name(req, resp, *, cat, cmd):
     '''requests for a category + command'''
     resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
+
 
 @api.route("/{cat}/{cmd}/upvote")
 async def vote(req, resp, *, cat, cmd):
@@ -63,12 +70,14 @@ async def vote(req, resp, *, cat, cmd):
     def commit_votes(cat, cmd):
         system('bin/commit_upvotes.sh')
 
+
     upvotes = record_upvote(cat, cmd)
     if type(upvotes) == int:
         commit_votes(cat, cmd)
         resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
     else:
         resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
+
 
 @api.route("/{cat}/{cmd}/add")
 async def share(req, resp, *, cat, cmd):
@@ -86,6 +95,7 @@ async def share(req, resp, *, cat, cmd):
     else:
         resp.text = ls
 
+
 def is_cli(req):
     '''determine if plaintext client in use'''
     if 'user-agent' in req.headers:
@@ -95,6 +105,7 @@ def is_cli(req):
                 return True
         return False
     return False
+
 
 def process_post_request(cat, cmd, oneliner, userid):
     '''process incoming command additions'''
@@ -111,6 +122,7 @@ def process_post_request(cat, cmd, oneliner, userid):
     else:
         return False
 
+
 def save_oneliner(cat, cmd, oneliner):
     '''write the command to a temp file'''
     nonce    = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(9))
@@ -122,6 +134,7 @@ def save_oneliner(cat, cmd, oneliner):
     else:
         return False
     
+
 @api.route("/login")
 async def github_login(req, resp):
     '''github login'''
@@ -136,6 +149,7 @@ async def github_login(req, resp):
     response      = 'Go to the following link in your browser:\n\n'
     response      += '\t' + authorize_url + '\n\n'
     resp.text     = banner(ip, time.time()) + response
+
 
 @api.route("/oauth2")
 async def github_callback(req, resp):
@@ -163,6 +177,65 @@ async def me(req, resp):
     gc        = Github(token)
     resp.text = gc.get_user().name + ' is authenticated'
     return gc.get_user()
+
+
+@api.route("/test")
+async def test(req, resp):
+    '''read file + write cache'''
+    global yaml
+    result = ''
+    #with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as file:
+
+    cmd = r"""iam=`whoami` && \
+echo $iam
+"""
+
+    cmd2=''
+    for line in cmd.splitlines():
+        cmd2 += '  %s\n' % line
+
+    #no funciona
+    d = {
+        "author": "benperove",
+        "upvotes": 0,
+        "url": "oneliner.sh/linux/test/upvote",
+        "purpose": "to say who i am",
+        "usage": "as is",
+        "variables": "none",
+        "command": cmd2
+    }
+
+    yaml_str = """\
+contributor: benperove
+upvotes: 1
+url: oneliner.sh/linux/test/upvote
+purpose: to say who i am
+usage: as is
+variables: none
+command: |
+""" + cmd2
+
+    #yaml.preserve_quotes = True
+    data      = yaml.load(yaml_str)
+    response2 = yaml.dump(data, sys.stdout)
+    cat       = 'linux'
+    com       = 'test'
+    line1     = '# ▲' + str(data['upvotes']) + ' ' + data['url'] + '\n'
+    len1      = len(line1) - 3
+    output    = ''
+    output    += line1
+    output    += '# purpose: ' + str(data['purpose']) + '\n'
+    output    += '# usage: ' + str(data['usage']) + '\n'
+    output    += '# variables: ' + str(data['variables']) + '\n'
+    output    += '# contributor: ' + str(data['contributor']) + '\n'
+    output    += '# ' + ('-'*len1) + '\n'
+    output    += data['command']
+    for line in output.splitlines():
+        result += colorize2(line)
+    #write to cache
+    #cache_write(cat + '/' + cmd, result)
+    resp.text = banner(ip, time.time()) + result
+
 
 def is_loggedin(req):
     '''determine if logged in'''
@@ -192,12 +265,14 @@ def is_loggedin(req):
         print('is_loggedin(): no cookie sent')
         return 'no cookie sent'
 
+
 def gen_session():
     '''generate session'''
     message   = bytes(ip, 'utf-8')
     secret    = bytes(secrets.SECRET, 'utf-8')
     signature = base64.b64encode(hmac.new(secret, message, digestmod=hashlib.sha256).digest())
     return signature.decode('utf-8')
+
 
 def record_upvote(cat, cmd):
     '''record vote'''
@@ -215,6 +290,7 @@ def record_upvote(cat, cmd):
             return votes
         else:
             return 'already upvoted'
+
 
 def get_answer(cat, cmd=None):
     '''get request answer'''
@@ -258,9 +334,10 @@ def get_answer(cat, cmd=None):
     #category not found
     return suggest_cat(cat, dirs)
 
+
 def read_file(cat, cmd):
     '''read file + write cache'''
-    result   = ''
+    result = ''
     with open(config.DATA_DIR + '/' + cat + '/' + cmd, 'r') as file:
         for line in file:
             result += colorize(line)
@@ -268,16 +345,19 @@ def read_file(cat, cmd):
     cache_write(cat + '/' + cmd, result)
     return result
 
+
 def suggest_cat(cat, dirs):
     '''offer category suggestions'''
     cats = ', '.join(dirs)
     return cat + ' not found\n' + 'suggestions: ' + cats
+
 
 def suggest_cmd(cat, cmd, suggestions):
     '''offer name suggestions for category'''
     '''not presently in use'''
     cmds = ', '.join(suggestions)
     return cmd + ' not found in ' + cat + '\n' + 'suggestions: ' + cmds
+
 
 def col(text, color=None):
     '''apply color formatting'''
@@ -337,6 +417,7 @@ def col(text, color=None):
     }
     return '\033[' + color_dict[color] + 'm' + text + '\033[0m'
 
+
 def colorize(text):
     '''colorize results'''
     if re.match(r'^#', text):
@@ -351,6 +432,22 @@ def colorize(text):
         colorized = col(text, 'f_white')
     return colorized
 
+
+def colorize2(text):
+    '''colorize results'''
+    if re.match(r'^#', text):
+        colorized = col(text + '\n', 'c_dark_gray')
+        if re.match(r'^# ▲', text):
+            line      = text.split(' ')
+            colorized = col(line[0] + ' ', 'c_dark_gray') + col(col(line[1], 'cb_dark_gray'), 'c_dark_gray_h') + col(' ' + line[2] + '\n', 'c_dark_gray')
+        if re.match(r'^# purpose:', text):
+            line      = text.split(':')
+            colorized = col(line[0] + ':', 'c_dark_gray') + col(line[1] + '\n', 'c_dark_gray_h')
+    else:
+        colorized = col(text + '\n', 'f_white')
+    return colorized
+
+
 def cache_read(key):
     '''cache - get value'''
     val = redis.get(key)
@@ -359,25 +456,31 @@ def cache_read(key):
     else:
         return None
 
+
 def cache_write(key, val):
     '''cache - set value'''
     redis.set(key, val)
+
 
 def cache_write_exp(key, val, ex):
     '''cache - set value with expiration'''
     redis.set(key, val, ex)
 
+
 def cache_delete(key):
     '''cache - delete key'''
     redis.delete(key)
+
 
 def cache_clear():
     '''cache - flush the entire cache db'''
     redis.flushdb()
 
+
 def time_elapsed(start_time):
     '''calculate request time'''
     return "%02.8f" % (time.time() - start_time)
+
 
 def banner(ip=None, start_time=None):
     '''print banner'''
@@ -396,6 +499,7 @@ def banner(ip=None, start_time=None):
 
 """
     return banner
+
 
 if __name__ == '__main__':
     '''ain't nothin' to it but to do it'''
