@@ -1,0 +1,6 @@
+# ▲0 oneliner.sh/find/replace/upvote
+# purpose: replace text in files
+# usage: set variable as
+# search=<search text> replace=<replace text> ext=<file extension>
+# ----------------------------------------------------------------
+search=search; replace=replace; ext=*.conf; find ./ -type f -name '$ext' -exec sed -i -e 's#$search#$replace#g' {} \;
