@@ -195,7 +195,7 @@ echo $iam
         cmd2 += '  %s\n' % line
 
     yaml_str = '''\
-contributor: benperove
+contributor:
 upvotes: 1
 url: oneliner.sh/linux/test/upvote
 purpose: to say who i am
@@ -204,20 +204,17 @@ variables: none
 command: |
 ''' + cmd2
 
-    #yaml.preserve_quotes = True
-    data      = yaml.load(yaml_str)
-    #cat       = 'linux'
-    #com       = 'test'
-    line1     = '# ▲' + str(data['upvotes']) + ' ' + data['url'] + '\n'
-    len1      = len(line1) - 3
-    output    = ''
-    output    += line1
-    output    += '# purpose: ' + str(data['purpose']) + '\n'
-    output    += '# usage: ' + str(data['usage']) + '\n'
-    output    += '# variables: ' + str(data['variables']) + '\n'
-    output    += '# contributor: ' + str(data['contributor']) + '\n'
-    output    += '# ' + ('-'*len1) + '\n'
-    output    += data['command']
+    data   = yaml.load(yaml_str)
+    line1  = '# ▲' + str(data['upvotes']) + ' ' + data['url'] + '\n'
+    len1   = len(line1) - 3
+    output = ''
+    output += line1
+    output += '# purpose: ' + str(data['purpose']) + '\n'
+    output += '# usage: ' + str(data['usage']) + '\n'
+    output += '# variables: ' + str(data['variables']) + '\n'
+    output += '# contributor: ' + (str(data['contributor']) or 'benperove') + '\n'
+    output += '# ' + ('-'*len1) + '\n'
+    output += data['command']
     for line in output.splitlines():
         result += colorize2(line)
     #write to cache
