@@ -41,11 +41,10 @@ def prepare_headers(req, resp):
 @api.route("/")
 async def main(req, resp):
     '''requests for the main page'''
-    page = """<html><head><!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133896562-1"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-133896562-1');</script><script async defer src="https://buttons.github.io/buttons.js"></script><style>body{background-color: #ABB8C3;}</style></head><a class="github-button" href="https://github.com/benperove/oneliner.sh" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star benperove/oneliner.sh on GitHub">Star</a><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
+    page = """<html><head><script async src="https://www.googletagmanager.com/gtag/js?id=UA-133896562-1"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-133896562-1');</script><script async defer src="https://buttons.github.io/buttons.js"></script><style>body{background-color: #ABB8C3;}</style></head><a class="github-button" href="https://github.com/benperove/oneliner.sh" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star benperove/oneliner.sh on GitHub">Star</a><img style="max-width:100%; max-height:100%; height:auto;" src="https://www.dropbox.com/s/ppf98l1hke2etad/carbon.png?raw=1" /></html>"""
     #elem = {'title': 'the title', 'result': '123'}
     if is_cli(req):
-        resp.text = banner(ip, time.time()) + get_answer('command')
+        resp.text = banner(ip, time.time()) + get_answer('command') + '\n\n'
     else:
         #resp.content = api.template('terminal.html', data=elem)
         resp.text = page
@@ -54,13 +53,13 @@ async def main(req, resp):
 @api.route("/{cat}")
 async def cat(req, resp, *, cat):
     '''requests for a category'''
-    resp.text = banner(ip, time.time()) + get_answer(cat)
+    resp.text = banner(ip, time.time()) + get_answer(cat) + '\n\n'
 
 
 @api.route("/{cat}/{cmd}")
 async def cat_name(req, resp, *, cat, cmd):
     '''requests for a category + command'''
-    resp.text = banner(ip, time.time()) + get_answer(cat, cmd)
+    resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + '\n\n'
 
 
 @api.route("/{cat}/{cmd}/upvote")
@@ -74,9 +73,9 @@ async def vote(req, resp, *, cat, cmd):
     upvotes = record_upvote(cat, cmd)
     if type(upvotes) == int:
         commit_votes(cat, cmd)
-        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!'
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + 'upvoted!\n\n'
     else:
-        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes
+        resp.text = banner(ip, time.time()) + get_answer(cat, cmd) + upvotes + '\n\n'
 
 
 @api.route("/{cat}/{cmd}/add")
@@ -89,11 +88,11 @@ async def share(req, resp, *, cat, cmd):
         oneliner = await req._starlette.body()
         oneliner = oneliner.decode('utf-8')
         if process_post_request(cat, cmd, oneliner, userid):
-            resp.text = cat + '/' + cmd + ' added to the queue by ' + userid
+            resp.text = cat + '/' + cmd + ' added to the queue by ' + userid + '\n\n'
         else:
-            resp.text = 'error'
+            resp.text = 'error\n\n' 
     else:
-        resp.text = ls
+        resp.text = ls + '\n\n'
 
 
 def is_cli(req):
@@ -212,7 +211,7 @@ command: |
     output += '# purpose: ' + str(data['purpose']) + '\n'
     output += '# usage: ' + str(data['usage']) + '\n'
     output += '# variables: ' + str(data['variables']) + '\n'
-    output += '# contributor: ' + (str(data['contributor']) or 'benperove') + '\n'
+    output += '# contributor: ' + (data['contributor'] or 'benperove') + '\n'
     output += '# ' + ('-'*len1) + '\n'
     output += data['command']
     for line in output.splitlines():
