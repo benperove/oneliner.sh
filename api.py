@@ -333,7 +333,7 @@ def read_file(cat, cmd):
 def suggest_cat(cat, dirs):
     '''offer category suggestions'''
     cats = ', '.join(dirs)
-    return cat + ' not specified\n' + 'suggestions: ' + cats
+    return cat + ' not specified\n' + '\nusage: curl oneliner.sh/command\n\n' + 'suggestions: ' + cats
 
 
 def suggest_cmd(cat, cmd, suggestions):
